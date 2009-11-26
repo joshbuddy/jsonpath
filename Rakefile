@@ -1,25 +1,34 @@
-require 'rubygems'
-require 'hoe'
-require 'spec'
-require 'lib/jsonpath'
-require 'spec/rake/spectask'
+require 'rake/testtask'
 
-Hoe.new('jsonpath', JsonPath::VERSION) do |p|
-  p.author = 'Joshua Hull'
-  p.email = 'joshbuddy@gmail.com'
-  p.summary = 'Ruby implementation of http://goessner.net/articles/JsonPath/'
-  p.description = p.paragraphs_of('README.txt', 2..2).join("\n\n")
-  p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name = "jsonpath"
+    s.description = s.summary = "Ruby implementation of http://goessner.net/articles/JsonPath/"
+    s.email = "joshbuddy@gmail.com"
+    s.homepage = "http://github.com/joshbuddy/jsonpath"
+    s.authors = ['Joshua Hull']
+    s.files = FileList["[A-Z]*", "{lib,spec}/**/*"]
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
 
-namespace(:spec) do
+require 'rake/rdoctask'
+desc "Generate documentation"
+Rake::RDocTask.new do |rd|
+  rd.main = "README.rdoc"
+  rd.rdoc_files.include("README.rdoc", "lib/**/*.rb")
+  rd.rdoc_dir = 'rdoc'
+end
 
-  task :all => [:jsont]
+require 'rubygems'
+require 'spec'
+require 'spec/rake/spectask'
 
-  Spec::Rake::SpecTask.new(:jsont) do |t|
-    t.spec_opts ||= []
-    t.spec_opts << "--options" << "spec/spec.opts"
-    t.spec_files = FileList['spec/*.rb']
-  end
-
+Spec::Rake::SpecTask.new do |t|
+  t.spec_opts ||= []
+  t.spec_opts << "--options" << "spec/spec.opts"
+  t.spec_files = FileList['spec/*.rb']
 end
