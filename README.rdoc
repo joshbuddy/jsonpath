@@ -1,46 +1,28 @@
-= jsonpath
+= Jsonpath
 
-== DESCRIPTION:
+This is an implementation of http://goessner.net/articles/JsonPath/. 
 
-* FIX (describe your package)
+== Usage
 
-== FEATURES/PROBLEMS:
-
-* FIX (list of features or problems)
-
-== SYNOPSIS:
-
-  FIX (code sample of usage)
-
-== REQUIREMENTS:
-
-* FIX (list of requirements)
-
-== INSTALL:
-
-* FIX (sudo gem install, anything else)
-
-== LICENSE:
-
-(The MIT License)
-
-Copyright (c) 2008 FIXME full name
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  wrapper = JsonPath.wrap(JSON.parse(<<-HERE_DOC))
+  {"store": 
+    {"bicycle":
+      {"price":19.95, "color":"red"},
+      "book":[
+        {"price":8.95, "category":"reference", "title":"Sayings of the Century", "author":"Nigel Rees"},
+        {"price":12.99, "category":"fiction", "title":"Sword of Honour", "author":"Evelyn Waugh"},
+        {"price":8.99, "category":"fiction", "isbn":"0-553-21311-3", "title":"Moby Dick", "author":"Herman Melville"},
+        {"price":22.99, "category":"fiction", "isbn":"0-395-19395-8", "title":"The Lord of the Rings", "author":"J. R. R. Tolkien"}
+      ]
+    }
+  }
+  HERE_DOC
+  
+  wrapper.path('$..price').to_a
+  => [19.95, 8.95, 12.99, 8.99, 22.99]
+  
+  wrapper.path('$..author').to_a
+  => ["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"]
+  
+  wrapper.path('$..book[::2]').to_a
+  => [{"price"=>8.95, "category"=>"reference", "author"=>"Nigel Rees", "title"=>"Sayings of the Century"}, {"price"=>8.99, "category"=>"fiction", "author"=>"Herman Melville", "title"=>"Moby Dick", "isbn"=>"0-553-21311-3"}]
