@@ -1,9 +1,7 @@
-$:.unshift(File.dirname(__FILE__)) unless
-  $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
-
+require File.join('jsonpath', 'expression')
+require File.join('jsonpath', 'wrapper')
 
 class JsonPath
-  VERSION = '0.0.1'
   
   def self.path(expression)
     @expression = Expression.new(expression)
@@ -24,5 +22,3 @@ class JsonPath
   end
     
 end
-require File.join('jsonpath', 'expression')
-require File.join('jsonpath', 'wrapper')

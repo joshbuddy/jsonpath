@@ -1,6 +1,5 @@
-require "rubygems"
-require 'lib/jsonpath.rb'
-require 'json'
+require 'spec_helper'
+
 describe "JsonPath" do
 
   object = { "store"=> {
