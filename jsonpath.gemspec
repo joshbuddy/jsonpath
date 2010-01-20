@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jsonpath}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Hull"]
-  s.date = %q{2009-11-25}
+  s.date = %q{2010-01-20}
   s.description = %q{Ruby implementation of http://goessner.net/articles/JsonPath/}
   s.email = %q{joshbuddy@gmail.com}
   s.extra_rdoc_files = [
@@ -25,7 +25,8 @@ Gem::Specification.new do |s|
     "lib/jsonpath/expression.rb",
     "lib/jsonpath/wrapper.rb",
     "spec/jsonpath_spec.rb",
-    "spec/spec.opts"
+    "spec/spec.opts",
+    "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/joshbuddy/jsonpath}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -33,7 +34,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{Ruby implementation of http://goessner.net/articles/JsonPath/}
   s.test_files = [
-    "spec/jsonpath_spec.rb"
+    "spec/jsonpath_spec.rb",
+    "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
