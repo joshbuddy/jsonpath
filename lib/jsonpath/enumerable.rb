@@ -1,44 +1,12 @@
-require 'strscan'
-
 class JsonPath
-  class Expression
-    def initialize(expression, object = nil)
-      scanner = StringScanner.new(expression)
-      @path = []
-      bracket_count = 0
-      while not scanner.eos?
-        token = scanner.scan_until(/($|\$|@|[a-zA-Z]+|\[.*?\]|\.\.|\.(?!\.))/)
-        case token
-        when '.'
-          # do nothing
-        when /^[a-zA-Z]+$/
-          @path << "['#{token}']"
-        else
-          bracket_count == 0 && @path << token or @path[-1] += token
-          bracket_count += token.count('[') - token.count(']')
-        end
-      end
-      @object = object
+  class Enumerable
+    include ::Enumerable
+    
+    def initialize(path, object)
+      @path, @object = path.path, object
     end
     
-    def test?(node = @object)
-      each(node) {|n| return true}
-      false
-    end
-    
-    def to_a(node = @object)
-      store = []
-      each(node) {|o| store << o}
-      store
-    end
-    
-    def map(node = @object)
-      store = []
-      each(node) {|o| store << (yield o)}
-      store
-    end
-    
-    def each(node = @object, pos = 0, options = {}, &blk)
+    def each(node = @object, pos = 0, &blk)
       if pos == @path.size
         return blk.call(node)
       else
@@ -59,14 +27,8 @@ class JsonPath
               end
             when ??
               (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
-                ::JsonPath.path(sub_path[2,sub_path.size - 3]) do |jp|
-                  @obj = node[e]
-                  begin
-                    each(node[e], pos + 1, &blk) if jp.test?(node[e])
-                  rescue
-                    # ignore ..
-                  end
-                end
+                subenum = ::JsonPath.new(sub_path[2,sub_path.size - 3]).on(node[e])
+                each(node[e], pos + 1, &blk) if subenum.any?{|n| true}
               end
             else
               if node.is_a?(Array)
@@ -82,7 +44,7 @@ class JsonPath
         else
           blk.call(node) if pos == (@path.size - 1) && eval("node #{@path[pos]}")
         end
-        
+
         if pos > 0 && @path[pos-1] == '..'
           case node
           when Hash
@@ -95,3 +57,4 @@ class JsonPath
     end
   end
 end
+  
