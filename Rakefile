@@ -8,7 +8,7 @@ begin
     s.email = "joshbuddy@gmail.com"
     s.homepage = "http://github.com/joshbuddy/jsonpath"
     s.authors = ['Joshua Hull']
-    s.files = FileList["[A-Z]*", "{lib,spec}/**/*"]
+    s.files = `git ls-files`.split(/\n/)
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -28,7 +28,15 @@ require 'spec'
 require 'spec/rake/spectask'
 
 Spec::Rake::SpecTask.new do |t|
+  t.ruby_opts = ['-rubygems']
   t.spec_opts ||= []
   t.spec_opts << "--options" << "spec/spec.opts"
   t.spec_files = FileList['spec/*.rb']
 end
+
+#require 'rake/testtask'
+#Rake::TestTask.new(:test) do |test|
+#  test.libs << 'lib' << 'test'
+#  test.pattern = 'test/**/*_test.rb'
+#  test.verbose = true
+#end

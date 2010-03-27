@@ -1,25 +1,34 @@
-$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
-require File.join('jsonpath', 'expression')
-require File.join('jsonpath', 'wrapper')
+require 'strscan'
+require 'load_path_find'
+
+$LOAD_PATH.add_current
+
+require File.join('jsonpath', 'enumerable')
 
 class JsonPath
-  
-  def self.path(expression)
-    @expression = Expression.new(expression)
-    if block_given?
-      yield @expression 
-    else
-      @expression 
+
+  attr_reader :path
+
+  def initialize(path)
+    scanner = StringScanner.new(path)
+    @path = []
+    bracket_count = 0
+    while not scanner.eos?
+      token = scanner.scan_until(/($|\$|@|[a-zA-Z]+|\[.*?\]|\.\.|\.(?!\.))/)
+      case token
+      when '.'
+        # do nothing
+      when /^[a-zA-Z]+$/
+        @path << "['#{token}']"
+      else
+        bracket_count == 0 && @path << token or @path[-1] += token
+        bracket_count += token.count('[') - token.count(']')
+      end
     end
   end
-  
-  def self.wrap(object)
-    @wrapper = Wrapper.new(object)
-    if block_given?
-      yield @wrapper
-    else
-      @wrapper 
-    end
+
+  def on(object)
+    JsonPath::Enumerable.new(self, object)
   end
-    
+
 end

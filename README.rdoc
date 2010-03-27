@@ -4,7 +4,7 @@ This is an implementation of http://goessner.net/articles/JsonPath/.
 
 == Usage
 
-  wrapper = JsonPath.wrap(JSON.parse(<<-HERE_DOC))
+  object = JSON.parse(<<-HERE_DOC))
   {"store": 
     {"bicycle":
       {"price":19.95, "color":"red"},
@@ -18,11 +18,11 @@ This is an implementation of http://goessner.net/articles/JsonPath/.
   }
   HERE_DOC
   
-  wrapper.path('$..price').to_a
+  JsonPath.new('$..price').on(object).to_a
   => [19.95, 8.95, 12.99, 8.99, 22.99]
   
-  wrapper.path('$..author').to_a
+  JsonPath.new('$..author').on(object).to_a
   => ["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"]
   
-  wrapper.path('$..book[::2]').to_a
+  JsonPath.new('$..book[::2]').on(object).to_a
   => [{"price"=>8.95, "category"=>"reference", "author"=>"Nigel Rees", "title"=>"Sayings of the Century"}, {"price"=>8.99, "category"=>"fiction", "author"=>"Herman Melville", "title"=>"Moby Dick", "isbn"=>"0-553-21311-3"}]
