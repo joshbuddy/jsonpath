@@ -12,7 +12,7 @@ class JsonPath
       else
         case expr = @path[pos]
         when '*', '..'
-          each(node, pos + 1, &blk) 
+          each(node, pos + 1, &blk)
         when '$'
           each(node, pos + 1, &blk) if node == @object
         when '@'
@@ -42,7 +42,8 @@ class JsonPath
             end
           end
         else
-          blk.call(node) if pos == (@path.size - 1) && eval("node #{@path[pos]}")
+          #p "#{node.inspect} ---> node #{@path[pos]}"
+          blk.call(node) if pos == (@path.size - 1) && node && eval("node #{@path[pos]}")
         end
 
         if pos > 0 && @path[pos-1] == '..'

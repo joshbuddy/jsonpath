@@ -1,5 +1,11 @@
 require 'rake/testtask'
 
+desc "Build it up"
+task :build do
+  sh "rex --independent -o lib/jsonpath/grammar.rex.rb lib/grammar/grammar.rex"
+  sh "racc -v -O parser.output -o lib/jsonpath/grammar.y.rb lib/grammar/grammar.y"
+end
+
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
@@ -34,9 +40,9 @@ Spec::Rake::SpecTask.new do |t|
   t.spec_files = FileList['spec/*.rb']
 end
 
-#require 'rake/testtask'
-#Rake::TestTask.new(:test) do |test|
-#  test.libs << 'lib' << 'test'
-#  test.pattern = 'test/**/*_test.rb'
-#  test.verbose = true
-#end
+require 'rake/testtask'
+Rake::TestTask.new(:test) do |test|
+  test.libs << 'lib' << 'test'
+  test.pattern = 'test/**/*_test.rb'
+  test.verbose = true
+end

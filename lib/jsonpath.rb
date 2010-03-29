@@ -14,15 +14,36 @@ class JsonPath
     @path = []
     bracket_count = 0
     while not scanner.eos?
-      token = scanner.scan_until(/($|\$|@|[a-zA-Z]+|\[.*?\]|\.\.|\.(?!\.))/)
-      case token
-      when '.'
-        # do nothing
-      when /^[a-zA-Z]+$/
-        @path << "['#{token}']"
-      else
-        bracket_count == 0 && @path << token or @path[-1] += token
+      if token = scanner.scan(/\$/)
+        bracket_count == 0 && @path << token or @path[-1] << token
         bracket_count += token.count('[') - token.count(']')
+      elsif token = scanner.scan(/@/)
+        bracket_count == 0 && @path << token or @path[-1] << token
+        bracket_count += token.count('[') - token.count(']')
+      elsif token = scanner.scan(/[a-zA-Z]+/)
+        @path << "['#{token}']"
+      elsif token = scanner.scan(/\[/)
+        count = 1
+        while !count.zero?
+          if t = scanner.scan(/\[/)
+            token << t
+            count += 1
+          elsif t = scanner.scan(/\]/)
+            token << t
+            count -= 1
+          elsif t = scanner.scan(/[^\[\]]*/)
+            token << t
+          end
+        end
+        @path << token
+      elsif token = scanner.scan(/\.\./)
+        bracket_count == 0 && @path << token or @path[-1] << token
+        bracket_count += token.count('[') - token.count(']')
+      elsif scanner.scan(/\./)
+      elsif token = scanner.scan(/\*/)
+        @path << token
+      elsif token = scanner.scan(/./)
+        @path.last << token
       end
     end
   end
