@@ -86,4 +86,9 @@ describe "JsonPath" do
     JsonPath.new('$..*').on(@object).to_a.size.should == 28
   end
   
+  it "should deal with a space in the key name" do
+    JsonPath.new("$.'c d'").on({"a" => "a","b" => "b", "c d" => "e"}).to_a.should == ['e']
+
+  end
+  
 end
