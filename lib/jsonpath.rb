@@ -15,11 +15,9 @@ class JsonPath
     bracket_count = 0
     while not scanner.eos?
       if token = scanner.scan(/\$/)
-        bracket_count == 0 && @path << token or @path[-1] << token
-        bracket_count += token.count('[') - token.count(']')
+        @path << token
       elsif token = scanner.scan(/@/)
-        bracket_count == 0 && @path << token or @path[-1] << token
-        bracket_count += token.count('[') - token.count(']')
+        @path << token
       elsif token = scanner.scan(/[a-zA-Z]+/)
         @path << "['#{token}']"
       elsif token = scanner.scan(/\[/)
@@ -37,8 +35,7 @@ class JsonPath
         end
         @path << token
       elsif token = scanner.scan(/\.\./)
-        bracket_count == 0 && @path << token or @path[-1] << token
-        bracket_count += token.count('[') - token.count(']')
+        @path << token
       elsif scanner.scan(/\./)
       elsif token = scanner.scan(/\*/)
         @path << token
