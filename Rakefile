@@ -1,10 +1,10 @@
 require 'rake/testtask'
 
-desc "Build it up"
-task :build do
-  sh "rex --independent -o lib/jsonpath/grammar.rex.rb lib/grammar/grammar.rex"
-  sh "racc -v -O parser.output -o lib/jsonpath/grammar.y.rb lib/grammar/grammar.y"
-end
+#desc "Build it up"
+#task :build do
+#  sh "rex --independent -o lib/jsonpath/grammar.rex.rb lib/grammar/grammar.rex"
+#  sh "racc -v -O parser.output -o lib/jsonpath/grammar.y.rb lib/grammar/grammar.y"
+#end
 
 begin
   require 'jeweler'

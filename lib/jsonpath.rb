@@ -1,7 +1,5 @@
 require 'strscan'
-require 'load_path_find'
-
-$LOAD_PATH.add_current
+$LOAD_PATH << File.expand_path(File.basename(__FILE__))
 
 require File.join('jsonpath', 'enumerable')
 
