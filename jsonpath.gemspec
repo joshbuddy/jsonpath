@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Hull"]
-  s.date = %q{2010-03-29}
+  s.date = %q{2010-04-27}
   s.description = %q{Ruby implementation of http://goessner.net/articles/JsonPath/}
   s.email = %q{joshbuddy@gmail.com}
   s.extra_rdoc_files = [
