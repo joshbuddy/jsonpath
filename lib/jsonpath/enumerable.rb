@@ -1,11 +1,11 @@
 class JsonPath
   class Enumerable
     include ::Enumerable
-    
+
     def initialize(path, object)
       @path, @object = path.path, object
     end
-    
+
     def each(node = @object, pos = 0, &blk)
       if pos == @path.size
         return blk.call(node)
@@ -23,7 +23,7 @@ class JsonPath
             when ?', ?"
               if node.is_a?(Hash)
                 key = sub_path[1,sub_path.size - 2]
-                each(node[key], pos + 1, &blk) if node.key?(key) 
+                each(node[key], pos + 1, &blk) if node.key?(key)
               end
             when ??
               (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
@@ -58,4 +58,3 @@ class JsonPath
     end
   end
 end
-  
