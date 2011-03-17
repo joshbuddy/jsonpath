@@ -1,0 +1,24 @@
+#!/usr/local/env ruby
+
+require 'jsonpath'
+require 'json'
+
+def usage
+  puts "jsonpath [expression] (file|string)
+
+If you omit the second argument, it will read stdin, assuming one valid JSON object
+per line. Expression must be a valid jsonpath expression."
+  exit!
+end
+
+usage unless ARGV[0]
+
+jsonpath = JsonPath.new(ARGV[0])
+case ARGV[1]
+when nil #stdin
+  until STDIN.eof?
+    puts jsonpath.on(JSON.parse(STDIN.readline)).to_a.to_json
+  end
+when String
+  puts jsonpath.on(JSON.parse(File.exist?(ARGV[1]) ? File.read(ARGV[1]) : ARGV[1])).to_a.to_json
+end
