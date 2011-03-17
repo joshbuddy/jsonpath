@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.summary = "Ruby implementation of http://goessner.net/articles/JsonPath/"
   s.description = "Ruby implementation of http://goessner.net/articles/JsonPath/."
   s.email = %q{joshbuddy@gmail.com}
-  s.extra_rdoc_files = ['README.rdoc']
+  s.extra_rdoc_files = ['README.md']
   s.files = `git ls-files`.split("\n")
   s.homepage = %q{http://github.com/joshbuddy/jsonpath}
   s.rdoc_options = ["--charset=UTF-8"]
