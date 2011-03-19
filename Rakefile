@@ -10,12 +10,9 @@ Rake::RDocTask.new do |rd|
 end
 
 require 'rubygems'
-require 'spec'
-require 'spec/rake/spectask'
 
-Spec::Rake::SpecTask.new do |t|
-  t.ruby_opts = ['-rubygems']
-  t.spec_opts ||= []
-  t.spec_opts << "--options" << "spec/spec.opts"
-  t.spec_files = FileList['spec/*.rb']
-end
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :spec
+task :test => :spec
