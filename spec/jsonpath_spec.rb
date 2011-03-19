@@ -35,7 +35,6 @@ describe "JsonPath" do
       }
     }
   end
-  #json = JsonPath.wrap(object)
 
   it "should lookup a direct path" do
     JsonPath.new('$.store.*').on(@object).to_a.first['book'].size.should == 4
@@ -51,13 +50,13 @@ describe "JsonPath" do
   end
 
   it "should retrieve all prices" do
-    JsonPath.new('$..price').on(@object).to_a.should == [
+    JsonPath.new('$..price').on(@object).to_a.sort.should == [
       @object['store']['bicycle']['price'],
       @object['store']['book'][0]['price'],
       @object['store']['book'][1]['price'],
       @object['store']['book'][2]['price'],
       @object['store']['book'][3]['price']
-    ]
+    ].sort
   end
 
   it "should recognize all types of array splices" do
