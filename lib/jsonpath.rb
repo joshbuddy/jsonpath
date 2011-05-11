@@ -1,6 +1,6 @@
 require 'strscan'
-require File.join('jsonpath', 'enumerable')
-require File.join('jsonpath', 'version')
+require 'jsonpath/enumerable'
+require 'jsonpath/version'
 
 class JsonPath
 
