@@ -30,7 +30,8 @@ describe "JsonPath" do
         ],
         "bicycle"=> {
           "color"=> "red",
-          "price"=> 19.95
+          "price"=> 19.95,
+          "catalogue_number" => 12345,
         }
       }
     }
@@ -76,13 +77,17 @@ describe "JsonPath" do
     JsonPath.new("$..book[?(@['isbn'])]").on(@object).to_a.should == [@object['store']['book'][2], @object['store']['book'][3]]
     JsonPath.new("$..book[?(@['price'] < 10)]").on(@object).to_a.should == [@object['store']['book'][0], @object['store']['book'][2]]
   end
+  
+  it "should recognize paths with underscores" do
+    JsonPath.new('$.store.bicycle.catalogue_number').on(@object).to_a.should == [@object['store']['bicycle']['catalogue_number']]
+  end
 
   it "should support eval'd array indicies" do
     JsonPath.new('$..book[(@.length-2)]').on(@object).to_a.should == [@object['store']['book'][2]]
   end
 
   it "should correct retrieve the right number of all nodes" do
-    JsonPath.new('$..*').on(@object).to_a.size.should == 28
+    JsonPath.new('$..*').on(@object).to_a.size.should == 29
   end
 
   it "should deal with a space in the key name" do
