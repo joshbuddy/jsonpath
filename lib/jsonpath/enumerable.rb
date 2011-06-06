@@ -42,7 +42,6 @@ class JsonPath
             end
           end
         else
-          #p "#{node.inspect} ---> node #{@path[pos]}"
           blk.call(node) if pos == (@path.size - 1) && node && eval("node #{@path[pos]}")
         end
 

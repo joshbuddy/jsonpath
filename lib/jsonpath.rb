@@ -45,6 +45,10 @@ class JsonPath
   end
 
   def on(object)
+    enum_on(object).to_a
+  end
+
+  def enum_on(object)
     JsonPath::Enumerable.new(self, object)
   end
 

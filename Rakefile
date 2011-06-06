@@ -9,8 +9,6 @@ Rake::RDocTask.new do |rd|
   rd.rdoc_dir = 'rdoc'
 end
 
-require 'rubygems'
-
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 
