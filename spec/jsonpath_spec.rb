@@ -32,7 +32,8 @@ describe "JsonPath" do
           "color"=> "red",
           "price"=> 19.95,
           "catalogue_number" => 12345,
-        }
+        },
+        "under_score" => "hello"
       }
     }
   end
@@ -91,7 +92,11 @@ describe "JsonPath" do
   end
 
   it "should correct retrieve the right number of all nodes" do
-    JsonPath.new('$..*').on(@object).to_a.size.should == 29
+    JsonPath.new('$..*').on(@object).to_a.size.should == 30
+  end
+
+  it "should correct retrieve the right number of all nodes" do
+    JsonPath.new('$..under_score').first(@object).should == 'hello'
   end
 
   it "should deal with a space in the key name" do
