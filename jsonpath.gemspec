@@ -18,12 +18,14 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.test_files = `git ls-files`.split("\n").select{|f| f =~ /^spec/}
   s.rubyforge_project = 'jsonpath'
+  s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
   # dependencies
   s.add_runtime_dependency 'json'
   s.add_development_dependency 'code_stats'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec', '~> 2.5.0'
-  s.add_development_dependency 'bundler',  '~> 1.0.0'
+  s.add_development_dependency 'minitest', '~> 2.2.0'
+  s.add_development_dependency 'phocus'
+  s.add_development_dependency 'bundler',  '~> 1.0.10'
 end
 

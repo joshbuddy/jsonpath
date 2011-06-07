@@ -9,8 +9,10 @@ Rake::RDocTask.new do |rd|
   rd.rdoc_dir = 'rdoc'
 end
 
-require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new(:spec)
-
-task :default => :spec
-task :test => :spec
+task :test do
+  $: << 'lib'
+  require 'minitest/autorun'
+  require 'phocus'
+  require 'jsonpath'
+  Dir['./test/**/test_*.rb'].each { |test| require test }
+end
