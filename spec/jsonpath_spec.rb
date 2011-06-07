@@ -86,6 +86,10 @@ describe "JsonPath" do
     JsonPath.new('$..book[(@.length-2)]').on(@object).to_a.should == [@object['store']['book'][2]]
   end
 
+  it "should support first" do
+    JsonPath.new('$..book[(@.length-2)]').first(@object) == @object['store']['book'][2]
+  end
+
   it "should correct retrieve the right number of all nodes" do
     JsonPath.new('$..*').on(@object).to_a.size.should == 29
   end
