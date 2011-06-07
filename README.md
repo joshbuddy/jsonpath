@@ -13,7 +13,8 @@ There is stand-alone usage through the binary `jsonpath`
 
 As well, you can include it as a library.
 
-    object = JSON.parse(<<-HERE_DOC))
+~~~~~ {ruby}
+    object = JSON.parse(<<-HERE_DOC)
     {"store": 
       {"bicycle":
         {"price":19.95, "color":"red"},
@@ -27,11 +28,21 @@ As well, you can include it as a library.
     }
     HERE_DOC
 
-    JsonPath.new('$..price').on(object).to_a
+    JsonPath.new('$..price').on(object)
     # => [19.95, 8.95, 12.99, 8.99, 22.99]
   
-    JsonPath.new('$..author').on(object).to_a
+    JsonPath.on(object, '$..author')
     # => ["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"]
   
-    JsonPath.new('$..book[::2]').on(object).to_a
+    JsonPath.new('$..book[::2]').on(object)
     # => [{"price"=>8.95, "category"=>"reference", "author"=>"Nigel Rees", "title"=>"Sayings of the Century"}, {"price"=>8.99, "category"=>"fiction", "author"=>"Herman Melville", "title"=>"Moby Dick", "isbn"=>"0-553-21311-3"}]
+
+    JsonPath.new('$..color').first(object)
+    # => "red"
+
+    # Lazy enumeration - only needs to find the first two matches
+    JsonPath.new('$..price').enum_on(object).each do |match|
+      break price if price < 15.0
+    end
+    # => 8.95
+~~~~~
