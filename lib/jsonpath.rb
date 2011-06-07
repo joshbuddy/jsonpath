@@ -52,6 +52,10 @@ class JsonPath
     JsonPath::Enumerable.new(self, object)
   end
 
+  def first_on(object)
+    JsonPath::Enumerable.new(self, object).first
+  end
+
   def self.on(object, path)
     self.new(path).on(object)
   end
