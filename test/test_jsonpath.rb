@@ -29,8 +29,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
     "bicycle"=> {
       "color"=> "red",
       "price"=> 19.95,
-      "catalogue_number" => 12345,
-    } } }
+      "catalogue_number" => 12345 }
+    } }
   end
 
   def test_lookup_direct_path
@@ -72,6 +72,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_recognize_filters
     assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@['isbn'])]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
+    assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@.isbn)]").on(@object)
+  end
+
+  def test_no_eval
+    assert_equal [], JsonPath.new('$..book[(@.length-2)]', :allow_eval => false).on(@object)
   end
   
   def test_paths_with_underscores

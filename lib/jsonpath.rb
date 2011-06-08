@@ -6,7 +6,8 @@ class JsonPath
 
   attr_reader :path
 
-  def initialize(path)
+  def initialize(path, opts = nil)
+    @opts = opts
     scanner = StringScanner.new(path)
     @path = []
     bracket_count = 0
@@ -53,11 +54,11 @@ class JsonPath
   end
 
   def enum_on(object)
-    JsonPath::Enumerable.new(self, object)
+    JsonPath::Enumerable.new(self, object, @opts)
   end
 
-  def self.on(object, path)
-    self.new(path).on(object)
+  def self.on(object, path, opts = nil)
+    self.new(path, opts).on(object)
   end
 
 end
