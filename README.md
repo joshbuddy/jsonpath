@@ -46,3 +46,5 @@ As well, you can include it as a library.
     end
     # => 8.95
 ~~~~~
+
+You can optionally prevent eval from being called on sub-expressions by passing in :allow_eval => false to the constructor.
