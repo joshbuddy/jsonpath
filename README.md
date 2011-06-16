@@ -50,7 +50,11 @@ As well, you can include it as a library.
 You can optionally prevent eval from being called on sub-expressions by passing in :allow_eval => false to the constructor.
 
 If you'd like to do substitution in a json object, do this:
+
+~~~~~ {ruby}
     JsonPath.for({'test' => 'time'}).gsub('$..test') {|v| v << v}
 
 The result will be
+
+~~~~~ {ruby}
     {'test' => 'timetime'}
