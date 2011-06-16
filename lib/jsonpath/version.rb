@@ -1,3 +1,3 @@
 class JsonPath
-  VERSION = '0.3.3'
+  VERSION = '0.4.0' unless const_defined?(:VERSION)
 end

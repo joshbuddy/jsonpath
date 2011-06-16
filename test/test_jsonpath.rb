@@ -1,40 +1,12 @@
 class TestJsonpath < MiniTest::Unit::TestCase
 
   def setup
-    @object = { "store"=> {
-      "book" => [
-        { "category"=> "reference",
-          "author"=> "Nigel Rees",
-          "title"=> "Sayings of the Century",
-          "price"=> 8.95
-        },
-        { "category"=> "fiction",
-          "author"=> "Evelyn Waugh",
-          "title"=> "Sword of Honour",
-          "price"=> 12.99
-        },
-        { "category"=> "fiction",
-          "author"=> "Herman Melville",
-          "title"=> "Moby Dick",
-          "isbn"=> "0-553-21311-3",
-          "price"=> 8.99
-        },
-        { "category"=> "fiction",
-          "author"=> "J. R. R. Tolkien",
-          "title"=> "The Lord of the Rings",
-          "isbn"=> "0-395-19395-8",
-          "price"=> 22.99
-        }
-      ],
-    "bicycle"=> {
-      "color"=> "red",
-      "price"=> 19.95,
-      "catalogue_number" => 12345 }
-    } }
+    @object = example_object
+    @object2 = example_object
   end
 
   def test_lookup_direct_path
-    assert_equal 4, JsonPath.new('$.store.*').on(@object).to_a.first['book'].size
+    assert_equal 4, JsonPath.new('$.store.*').on(@object).first['book'].size
   end
 
   def test_retrieve_all_authors
@@ -101,6 +73,63 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_class_method
     assert_equal JsonPath.new('$..author').on(@object), JsonPath.on(@object, '$..author')
+  end
+
+  def test_gsub
+    @object2['store']['bicycle']['price'] += 10
+    @object2['store']['book'][0]['price'] += 10
+    @object2['store']['book'][1]['price'] += 10
+    @object2['store']['book'][2]['price'] += 10
+    @object2['store']['book'][3]['price'] += 10
+    assert_equal @object2, JsonPath.for(@object).gsub('$..price') { |p| p + 10 }
+  end
+
+  def test_gsub!
+    JsonPath.for(@object).gsub!('$..price') { |p| p + 10 }
+    assert_equal 30, @object['store']['bicycle']['price']
+    assert_equal 19, @object['store']['book'][0]['price']
+    assert_equal 23, @object['store']['book'][1]['price']
+    assert_equal 19, @object['store']['book'][2]['price']
+    assert_equal 33, @object['store']['book'][3]['price']
+  end
+
+  def test_weird_gsub!
+    h = {'hi' => 'there'}
+    JsonPath.for(@object).gsub!('$.*') { |n| h }
+    assert_equal h, @object
+  end
+
+  def example_object
+    { "store"=> {
+      "book" => [
+        { "category"=> "reference",
+          "author"=> "Nigel Rees",
+          "title"=> "Sayings of the Century",
+          "price"=> 9
+        },
+        { "category"=> "fiction",
+          "author"=> "Evelyn Waugh",
+          "title"=> "Sword of Honour",
+          "price"=> 13
+        },
+        { "category"=> "fiction",
+          "author"=> "Herman Melville",
+          "title"=> "Moby Dick",
+          "isbn"=> "0-553-21311-3",
+          "price"=> 9
+        },
+        { "category"=> "fiction",
+          "author"=> "J. R. R. Tolkien",
+          "title"=> "The Lord of the Rings",
+          "isbn"=> "0-395-19395-8",
+          "price"=> 23
+        }
+      ],
+    "bicycle"=> {
+      "color"=> "red",
+      "price"=> 20,
+      "catalogue_number" => 12345 }
+    } }
   end
 
 end

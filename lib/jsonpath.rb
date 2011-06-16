@@ -1,4 +1,5 @@
 require 'strscan'
+require 'jsonpath/proxy'
 require 'jsonpath/enumerable'
 require 'jsonpath/version'
 
@@ -61,4 +62,7 @@ class JsonPath
     self.new(path, opts).on(object)
   end
 
+  def self.for(obj)
+    Proxy.new(obj)
+  end
 end
