@@ -53,8 +53,10 @@ If you'd like to do substitution in a json object, do this:
 
 ~~~~~ {ruby}
     JsonPath.for({'test' => 'time'}).gsub('$..test') {|v| v << v}
+~~~~~
 
 The result will be
 
 ~~~~~ {ruby}
     {'test' => 'timetime'}
+~~~~~
