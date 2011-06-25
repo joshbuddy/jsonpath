@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
   # dependencies
-  s.add_runtime_dependency 'yajl-ruby'
+  s.add_runtime_dependency 'multi_json'
   s.add_development_dependency 'code_stats'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'minitest', '~> 2.2.0'
