@@ -1,7 +1,7 @@
 #!/usr/local/env ruby
 
 require 'jsonpath'
-require 'yajl'
+require 'multi_json'
 
 def usage
   puts "jsonpath [expression] (file|string)
@@ -17,8 +17,8 @@ jsonpath = JsonPath.new(ARGV[0])
 case ARGV[1]
 when nil #stdin
   until STDIN.eof?
-    puts Yajl::Encoder.encode(jsonpath.on(Yajl::Parser.parse(STDIN.readline)))
+    puts MultiJson.encode(jsonpath.on(MultiJson.decode(STDIN.readline)))
   end
 when String
-  puts Yajl::Encoder.encode(jsonpath.on(Yajl::Parser.parse(File.exist?(ARGV[1]) ? File.read(ARGV[1]) : ARGV[1])))
+  puts MultiJson.encode(jsonpath.on(MultiJson.decode(File.exist?(ARGV[1]) ? File.read(ARGV[1]) : ARGV[1])))
 end
