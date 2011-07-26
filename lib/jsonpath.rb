@@ -21,7 +21,7 @@ class JsonPath
         @path << "['#{token}']"
       elsif token = scanner.scan(/'(.*?)'/)
         @path << "[#{token}]"
-      elsif token = scanner.scan(/\[/)      
+      elsif token = scanner.scan(/\[/)
         count = 1
         while !count.zero?
           if t = scanner.scan(/\[/)
@@ -35,20 +35,20 @@ class JsonPath
           end
         end
         @path << token
-      elsif token = scanner.scan(/\.\./)               
+      elsif token = scanner.scan(/\.\./)
         @path << token
       elsif scanner.scan(/\./)
         nil
       elsif token = scanner.scan(/\*/)
         @path << token
-      elsif token = scanner.scan(/[><=] \d+/)        
+      elsif token = scanner.scan(/[><=] \d+/)
         @path.last << token
       elsif token = scanner.scan(/./)
         @path.last << token
       end
     end
   end
-          
+
   def on(object)
     enum_on(object).to_a
   end

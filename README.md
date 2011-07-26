@@ -1,6 +1,6 @@
 # Jsonpath
 
-This is an implementation of http://goessner.net/articles/JsonPath/. 
+This is an implementation of http://goessner.net/articles/JsonPath/.
 
 ## Usage
 
@@ -15,7 +15,7 @@ As well, you can include it as a library.
 
 ~~~~~ {ruby}
     object = JSON.parse(<<-HERE_DOC)
-    {"store": 
+    {"store":
       {"bicycle":
         {"price":19.95, "color":"red"},
         "book":[
@@ -30,10 +30,10 @@ As well, you can include it as a library.
 
     JsonPath.new('$..price').on(object)
     # => [19.95, 8.95, 12.99, 8.99, 22.99]
-  
+
     JsonPath.on(object, '$..author')
     # => ["Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"]
-  
+
     JsonPath.new('$..book[::2]').on(object)
     # => [{"price"=>8.95, "category"=>"reference", "author"=>"Nigel Rees", "title"=>"Sayings of the Century"}, {"price"=>8.99, "category"=>"fiction", "author"=>"Herman Melville", "title"=>"Moby Dick", "isbn"=>"0-553-21311-3"}]
 

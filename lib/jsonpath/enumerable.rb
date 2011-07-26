@@ -67,7 +67,7 @@ class JsonPath
 
     private
     def yield_value(blk, context, key)
-      @substitute_with = nil 
+      @substitute_with = nil
       case @mode
       when nil
         blk.call(key ? context[key] : context)
