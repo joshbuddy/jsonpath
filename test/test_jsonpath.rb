@@ -44,6 +44,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_recognize_filters
     assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@['isbn'])]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] == 9)]").on(@object)    
+    assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)        
     assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@.isbn)]").on(@object)
   end
 
@@ -54,6 +56,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_paths_with_underscores
     assert_equal [@object['store']['bicycle']['catalogue_number']], JsonPath.new('$.store.bicycle.catalogue_number').on(@object)
   end
+  
+  def test_paths_with_numbers
+    assert_equal [@object['store']['bicycle']['2seater']], JsonPath.new('$.store.bicycle.2seater').on(@object)
+  end  
 
   def test_recognize_array_with_evald_index
     assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-2)]').on(@object)
@@ -64,7 +70,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 29, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 30, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -128,7 +134,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
     "bicycle"=> {
       "color"=> "red",
       "price"=> 20,
-      "catalogue_number" => 12345 }
+      "catalogue_number" => 12345,
+      "2seater" => "yes"}
     } }
   end
 
