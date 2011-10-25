@@ -16,3 +16,5 @@ task :test do
   require 'jsonpath'
   Dir['./test/**/test_*.rb'].each { |test| require test }
 end
+
+task :default => :test
