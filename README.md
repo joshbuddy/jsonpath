@@ -55,6 +55,7 @@ path.on(json)
 ~~~~~
 
 Or on some other object ...
+
 ~~~~~ {ruby}
 path.on('{"books":[{"title":"A Tale of Two Somethings","price":18.88}]}')
 # => [18.88]
