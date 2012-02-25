@@ -48,8 +48,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
   end
 
-  def test_recognize_filters_on_val
-    assert_equal [@object['store']['book'][1]['price'], @object['store']['book'][3]['price'], @object['store']['bicycle']['price']], JsonPath.new("$..price[?(@ > 10)]").on(@object)
+  if RUBY_VERSION[/^1\.9/]
+    def test_recognize_filters_on_val
+      assert_equal [@object['store']['book'][1]['price'], @object['store']['book'][3]['price'], @object['store']['bicycle']['price']], JsonPath.new("$..price[?(@ > 10)]").on(@object)
+    end
   end
 
   def test_no_eval
