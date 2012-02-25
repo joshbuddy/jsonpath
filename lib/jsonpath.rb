@@ -56,12 +56,8 @@ class JsonPath
     enum_on(obj_or_str).to_a
   end
 
-  [:first, :last].each do |convenience_method|
-    class_eval <<-EOT
-      def #{convenience_method}(*args, &blk)
-        enum_on(args.shift).#{convenience_method}(*args, &blk)
-      end
-    EOT
+  def first(obj_or_str, *args)
+    enum_on(obj_or_str).first(*args)
   end
 
   def enum_on(obj_or_str, mode = nil)
