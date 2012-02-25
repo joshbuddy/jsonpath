@@ -1,9 +1,12 @@
 require 'strscan'
+require 'multi_json'
 require 'jsonpath/proxy'
 require 'jsonpath/enumerable'
 require 'jsonpath/version'
 
 class JsonPath
+
+  PATH_ALL = '$..*'
 
   attr_reader :path
 
@@ -49,23 +52,33 @@ class JsonPath
     end
   end
 
-  def on(object)
-    enum_on(object).to_a
+  def on(obj_or_str)
+    enum_on(obj_or_str).to_a
   end
 
-  def first(object)
-    enum_on(object).first
+  [:first, :last].each do |convenience_method|
+    class_eval <<-EOT
+      def #{convenience_method}(*args, &blk)
+        enum_on(args.shift).#{convenience_method}(*args, &blk)
+      end
+    EOT
   end
 
-  def enum_on(object)
-    JsonPath::Enumerable.new(self, object, @opts)
+  def enum_on(obj_or_str, mode = nil)
+    JsonPath::Enumerable.new(self, self.class.process_object(obj_or_str), mode, @opts)
+  end
+  alias_method :[], :enum_on
+
+  def self.on(obj_or_str, path, opts = nil)
+    self.new(path, opts).on(process_object(obj_or_str))
   end
 
-  def self.on(object, path, opts = nil)
-    self.new(path, opts).on(object)
+  def self.for(obj_or_str)
+    Proxy.new(process_object(obj_or_str))
   end
 
-  def self.for(obj)
-    Proxy.new(obj)
+  private
+  def self.process_object(obj_or_str)
+    obj_or_str.is_a?(String) ? MultiJson.decode(obj_or_str) : obj_or_str
   end
 end

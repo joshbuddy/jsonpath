@@ -46,7 +46,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] == 9)]").on(@object)
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
-    assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@.isbn)]").on(@object)
+  end
+
+  def test_recognize_filters_on_val
+    assert_equal [@object['store']['book'][1]['price'], @object['store']['book'][3]['price'], @object['store']['bicycle']['price']], JsonPath.new("$..price[?(@ > 10)]").on(@object)
   end
 
   def test_no_eval
@@ -87,7 +90,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     @object2['store']['book'][1]['price'] += 10
     @object2['store']['book'][2]['price'] += 10
     @object2['store']['book'][3]['price'] += 10
-    assert_equal @object2, JsonPath.for(@object).gsub('$..price') { |p| p + 10 }
+    assert_equal @object2, JsonPath.for(@object).gsub('$..price') { |p| p + 10 }.to_hash
   end
 
   def test_gsub!
@@ -103,6 +106,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
     h = {'hi' => 'there'}
     JsonPath.for(@object).gsub!('$.*') { |n| h }
     assert_equal h, @object
+  end
+
+  def test_compact
+    h = {'hi' => 'there', 'you' => nil}
+    JsonPath.for(h).compact!
+    assert_equal({'hi' => 'there'}, h)
+  end
+
+  def test_delete
+    h = {'hi' => 'there', 'you' => nil}
+    JsonPath.for(h).delete!('*.hi')
+    assert_equal({'you' => nil}, h)
   end
 
   def example_object

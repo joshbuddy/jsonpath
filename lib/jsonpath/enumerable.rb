@@ -4,14 +4,14 @@ class JsonPath
     attr_reader :allow_eval
     alias_method :allow_eval?, :allow_eval
 
-    def initialize(path, object, options = nil)
-      @path, @object, @options = path.path, object, options
+    def initialize(path, object, mode, options = nil)
+      @path, @object, @mode, @options = path.path, object, mode, options
       @allow_eval = @options && @options.key?(:allow_eval) ? @options[:allow_eval] : true
-      @mode = @options && @options[:mode]
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
       node = key ? context[key] : context
+      @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
       case expr = @path[pos]
       when '*', '..'
@@ -29,14 +29,21 @@ class JsonPath
               each(node, k, pos + 1, &blk) if node.key?(k)
             end
           when ??
-            (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
-              subenum = ::JsonPath.new(sub_path[2, sub_path.size - 3]).on(node[e])
-              each(node, e, pos + 1, &blk) if subenum.any?{|n| true}
+            raise "Cannot use ?(...) unless eval is enabled" unless allow_eval?
+            case node
+            when Hash, Array
+              (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
+                each(node, e, pos + 1) { |n|
+                  @_current_node = n
+                  yield n if process_function_or_literal(sub_path[1, sub_path.size - 1])
+                }
+              end
+            else
+              yield node if process_function_or_literal(sub_path[1, sub_path.size - 1])
             end
           else
             if node.is_a?(Array)
-              @obj = node
-              array_args = sub_path.gsub('@','@obj').split(':')
+              array_args = sub_path.split(':')
               start_idx = process_function_or_literal(array_args[0], 0)
               next unless start_idx
               start_idx %= node.size
@@ -67,10 +74,13 @@ class JsonPath
 
     private
     def yield_value(blk, context, key)
-      @substitute_with = nil
       case @mode
       when nil
         blk.call(key ? context[key] : context)
+      when :compact
+        context.delete(key) if key && context[key].nil?
+      when :delete
+        context.delete(key) if key
       when :substitute
         if key
           context[key] = blk.call(context[key])
@@ -80,11 +90,14 @@ class JsonPath
       end
     end
 
-    def process_function_or_literal(exp, default)
+    def process_function_or_literal(exp, default = nil)
       if exp.nil?
         default
       elsif exp[0] == ?(
-        allow_eval? ? eval(exp) : nil
+        #p @_current_node
+        #p exp.gsub(/@/, '@_current_node')
+        #p eval(exp.gsub(/@/, '@_current_node'))
+        allow_eval? ? @_current_node && eval(exp.gsub(/@/, '@_current_node')) : nil
       elsif exp.empty?
         default
       else
