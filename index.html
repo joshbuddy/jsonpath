@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Jsonpath : Ruby implementation of http://goessner.net/articles/JsonPath/" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Jsonpath</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/joshbuddy/jsonpath">Fork Me on GitHub</a>
+
+          <h1 id="project_title">Jsonpath</h1>
+          <h2 id="project_tagline">Ruby implementation of http://goessner.net/articles/JsonPath/</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/joshbuddy/jsonpath/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/joshbuddy/jsonpath/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>JsonPath</h1>
+
+<p>This is an implementation of <a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a>.</p>
+
+<h2>What is JsonPath?</h2>
+
+<p>JsonPath is a way of addressing elements within a JSON object. Similar to xpath of yore, JsonPath lets you
+traverse a json object and manipulate or access it.</p>
+
+<h2>Usage</h2>
+
+<h3>Command-line</h3>
+
+<p>There is stand-alone usage through the binary <code>jsonpath</code></p>
+
+<pre><code>jsonpath [expression] (file|string)
+
+If you omit the second argument, it will read stdin, assuming one valid JSON object
+per line. Expression must be a valid jsonpath expression.
+</code></pre>
+
+<h3>Library</h3>
+
+<p>To use JsonPath as a library simply include and get goin'!</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'jsonpath'</span>
+
+<span class="n">json</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="no">HERE_DOC</span>
+<span class="sh">{"store":</span>
+<span class="sh">  {"bicycle":</span>
+<span class="sh">    {"price":19.95, "color":"red"},</span>
+<span class="sh">    "book":[</span>
+<span class="sh">      {"price":8.95, "category":"reference", "title":"Sayings of the Century", "author":"Nigel Rees"},</span>
+<span class="sh">      {"price":12.99, "category":"fiction", "title":"Sword of Honour", "author":"Evelyn Waugh"},</span>
+<span class="sh">      {"price":8.99, "category":"fiction", "isbn":"0-553-21311-3", "title":"Moby Dick", "author":"Herman Melville","color":"blue"},</span>
+<span class="sh">      {"price":22.99, "category":"fiction", "isbn":"0-395-19395-8", "title":"The Lord of the Rings", "author":"Tolkien"}</span>
+<span class="sh">    ]</span>
+<span class="sh">  }</span>
+<span class="sh">}</span>
+<span class="no">HERE_DOC</span>
+</pre>
+</div>
+
+
+<p>Now that we have a JSON object, let's get all the prices present in the object. We create an object for the path
+in the following way.</p>
+
+<div class="highlight">
+<pre><span class="n">path</span> <span class="o">=</span> <span class="no">JsonPath</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'$..price'</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p>Now that we have a path, let's apply it to the object above.</p>
+
+<div class="highlight">
+<pre><span class="n">path</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+<span class="c1"># =&gt; [19.95, 8.95, 12.99, 8.99, 22.99]</span>
+</pre>
+</div>
+
+
+<p>Or on some other object ...</p>
+
+<div class="highlight">
+<pre><span class="n">path</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">'{"books":[{"title":"A Tale of Two Somethings","price":18.88}]}'</span><span class="p">)</span>
+<span class="c1"># =&gt; [18.88]</span>
+</pre>
+</div>
+
+
+<p>You can also just combine this into one mega-call with the convenient <code>JsonPath.on</code> method.</p>
+
+<div class="highlight">
+<pre><span class="no">JsonPath</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="s1">'$..author'</span><span class="p">)</span>
+<span class="c1"># =&gt; ["Nigel Rees", "Evelyn Waugh", "Herman Melville", "Tolkien"]</span>
+</pre>
+</div>
+
+
+<p>Of course the full JsonPath syntax is supported, such as array slices</p>
+
+<div class="highlight">
+<pre><span class="no">JsonPath</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'$..book[::2]'</span><span class="p">)</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+<span class="c1"># =&gt; [</span>
+<span class="c1">#      {"price"=&gt;8.95, "category"=&gt;"reference", "author"=&gt;"Nigel Rees", "title"=&gt;"Sayings of the Century"},</span>
+<span class="c1">#      {"price"=&gt;8.99, "category"=&gt;"fiction", "author"=&gt;"Herman Melville", "title"=&gt;"Moby Dick", "isbn"=&gt;"0-553-21311-3"}</span>
+<span class="c1">#    ]</span>
+</pre>
+</div>
+
+
+<p>...and evals.</p>
+
+<div class="highlight">
+<pre><span class="no">JsonPath</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'$..price[?(@ &lt; 20)]'</span><span class="p">)</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+<span class="c1"># =&gt; [8.95, 8.99]</span>
+</pre>
+</div>
+
+
+<p>There is a convenience method, <code>#first</code> that gives you the first element for a JSON object and path.</p>
+
+<div class="highlight">
+<pre><span class="no">JsonPath</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'$..color'</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+<span class="c1"># =&gt; "red"</span>
+</pre>
+</div>
+
+
+<p>As well, we can directly create an <code>Enumerable</code> at any time using <code>#[]</code>. </p>
+
+<div class="highlight">
+<pre><span class="n">enum</span> <span class="o">=</span> <span class="no">JsonPath</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'$..color'</span><span class="p">)</span><span class="o">[</span><span class="n">object</span><span class="o">]</span>
+<span class="c1"># =&gt; #&lt;JsonPath::Enumerable:...&gt;</span>
+<span class="n">enum</span><span class="o">.</span><span class="n">first</span>
+<span class="c1"># =&gt; "red"</span>
+<span class="n">enum</span><span class="o">.</span><span class="n">any?</span><span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">'red'</span> <span class="p">}</span>
+<span class="c1"># =&gt; true</span>
+</pre>
+</div>
+
+
+<p>You can optionally prevent eval from being called on sub-expressions by passing in :allow_eval =&gt; false to the constructor.</p>
+
+<h3>Manipulation</h3>
+
+<p>If you'd like to do substitution in a json object, you can use <code>#gsub</code> or <code>#gsub!</code> to modify the object in place.</p>
+
+<div class="highlight">
+<pre><span class="no">JsonPath</span><span class="o">.</span><span class="n">for</span><span class="p">(</span><span class="s1">'{"candy":"lollipop"}'</span><span class="p">)</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">'$..candy'</span><span class="p">)</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="s2">"big turks"</span> <span class="p">}</span><span class="o">.</span><span class="n">to_hash</span>
+</pre>
+</div>
+
+
+<p>The result will be</p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="s1">'candy'</span> <span class="o">=&gt;</span> <span class="s1">'big turks'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>If you'd like to remove all nil keys, you can use <code>#compact</code> and <code>#compact!</code>. To remove all keys under a certain path, use <code>#delete</code> or <code>#delete!</code>. You can even chain these methods together as follows:</p>
+
+<div class="highlight">
+<pre><span class="n">json</span> <span class="o">=</span> <span class="s1">'{"candy":"lollipop","noncandy":null,"other":"things"}'</span>
+<span class="n">o</span> <span class="o">=</span> <span class="no">JsonPath</span><span class="o">.</span><span class="n">for</span><span class="p">(</span><span class="n">json</span><span class="p">)</span><span class="o">.</span>
+  <span class="nb">gsub</span><span class="p">(</span><span class="s1">'$..candy'</span><span class="p">)</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="s2">"big turks"</span> <span class="p">}</span><span class="o">.</span>
+  <span class="n">compact</span><span class="o">.</span>
+  <span class="n">delete</span><span class="p">(</span><span class="s1">'$..other'</span><span class="p">)</span><span class="o">.</span>
+  <span class="n">to_hash</span>
+<span class="c1"># =&gt; {"candy" =&gt; "big turks"}</span>
+</pre>
+</div>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Jsonpath maintained by <a href="https://github.com/joshbuddy">joshbuddy</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
