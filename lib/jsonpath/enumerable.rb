@@ -44,11 +44,16 @@ class JsonPath
           else
             if node.is_a?(Array)
               array_args = sub_path.split(':')
-              start_idx = process_function_or_literal(array_args[0], 0)
-              next unless start_idx
+              if array_args[0] == ?*
+                start_idx = 0
+                end_idx = node.size - 1
+              else
+                start_idx = process_function_or_literal(array_args[0], 0)
+                next unless start_idx
+                end_idx = (array_args[1] && process_function_or_literal(array_args[1], -1) || (sub_path.count(':') == 0 ? start_idx : -1))
+                next unless end_idx
+              end
               start_idx %= node.size
-              end_idx = (array_args[1] && process_function_or_literal(array_args[1], -1) || (sub_path.count(':') == 0 ? start_idx : -1))
-              next unless end_idx
               end_idx %= node.size
               step = process_function_or_literal(array_args[2], 1)
               next unless step

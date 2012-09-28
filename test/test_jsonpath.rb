@@ -122,6 +122,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal({'you' => nil}, h)
   end
 
+  def test_wildcard
+    assert_equal @object['store']['book'].collect{|e| e['price']}, JsonPath.on(@object, '$..book[*].price')
+  end
+
   def example_object
     { "store"=> {
       "book" => [
