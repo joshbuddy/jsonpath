@@ -99,10 +99,15 @@ class JsonPath
       if exp.nil?
         default
       elsif exp[0] == ?(
-        #p @_current_node
-        #p exp.gsub(/@/, '@_current_node')
-        #p eval(exp.gsub(/@/, '@_current_node'))
-        allow_eval? ? @_current_node && eval(exp.gsub(/@/, '@_current_node')) : nil
+        return nil unless allow_eval? && @_current_node
+        match_result = /@\.(\p{Word}+)/.match(exp) || []
+        identifier = match_result[1]
+        # if there's no such method - convert into hash subscript
+        if !identifier.nil? && !@_current_node.methods.include?(identifier.to_sym)
+          return eval(exp.gsub(/@/, '@_current_node').gsub(/.#{identifier}/,"['#{identifier}']"))
+        end
+        # otherwise eval as is
+        eval(exp.gsub(/@/, '@_current_node'))
       elsif exp.empty?
         default
       else
