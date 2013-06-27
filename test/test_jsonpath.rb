@@ -9,6 +9,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal 4, JsonPath.new('$.store.*').on(@object).first['book'].size
   end
 
+  def test_lookup_missing_element
+    assert_equal [], JsonPath.new('$.store.book[99].price').on(@object)
+  end
+
   def test_retrieve_all_authors
     assert_equal [
       @object['store']['book'][0]['author'],
