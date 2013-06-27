@@ -52,6 +52,9 @@ class JsonPath
                 next unless start_idx
                 end_idx = (array_args[1] && process_function_or_literal(array_args[1], -1) || (sub_path.count(':') == 0 ? start_idx : -1))
                 next unless end_idx
+                if start_idx == end_idx
+                  next unless start_idx < node.size 
+                end
               end
               start_idx %= node.size
               end_idx %= node.size
