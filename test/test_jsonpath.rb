@@ -134,6 +134,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal @object['store']['book'].collect{|e| e['price']}, JsonPath.on(@object, '$..book[*].price')
   end
 
+  def test_wildcard_empty_array
+    object = @object.merge("bicycle" => { "tire" => [] })
+    assert_equal [], JsonPath.on(object, "$..bicycle.tire[*]")
+  end
+
   def test_support_filter_by_childnode_value
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@.price > 20)]").on(@object)
   end
