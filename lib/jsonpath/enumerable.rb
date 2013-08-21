@@ -43,6 +43,7 @@ class JsonPath
             end
           else
             if node.is_a?(Array)
+              next if node.empty?
               array_args = sub_path.split(':')
               if array_args[0] == ?*
                 start_idx = 0
