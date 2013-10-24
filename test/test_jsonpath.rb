@@ -143,6 +143,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@.price > 20)]").on(@object)
   end
 
+  def test_support_filter_by_childnode_value_with_inconsistent_children
+    @object['store']['book'][0] = "string_instead_of_object"
+    assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@.price > 20)]").on(@object)
+  end
+
   def example_object
     { "store"=> {
       "book" => [

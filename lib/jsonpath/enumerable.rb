@@ -108,7 +108,12 @@ class JsonPath
         identifier = match_result[1]
         # if there's no such method - convert into hash subscript
         if !identifier.nil? && !@_current_node.methods.include?(identifier.to_sym)
-          return eval(exp.gsub(/@/, '@_current_node').gsub(/.#{identifier}/,"['#{identifier}']"))
+          exp_to_eval = exp.gsub(/@/, '@_current_node').gsub(/@_current_node.#{identifier}/,"@_current_node['#{identifier}']")
+          begin
+            return eval(exp_to_eval)
+          rescue StandardError # if eval failed because of bad arguments or missing methods
+            return default
+          end
         end
         # otherwise eval as is
         eval(exp.gsub(/@/, '@_current_node'))
