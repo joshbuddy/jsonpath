@@ -33,10 +33,10 @@ class JsonPath
             case node
             when Hash, Array
               (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
-                each(node, e, pos + 1) { |n|
-                  @_current_node = n
-                  yield n if process_function_or_literal(sub_path[1, sub_path.size - 1])
-                }
+                @_current_node = node[e]
+                if process_function_or_literal(sub_path[1, sub_path.size - 1])
+                  each(@_current_node, nil, pos + 1, &blk)
+                end
               end
             else
               yield node if process_function_or_literal(sub_path[1, sub_path.size - 1])
