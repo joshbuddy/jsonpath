@@ -8,6 +8,11 @@ class JsonPath
 
   PATH_ALL = '$..*'
 
+  Root = Class.new
+  Current = Class.new
+  Star = Class.new
+  Any = Class.new
+
   attr_reader :path
 
   def initialize(path, opts = nil)
@@ -15,11 +20,11 @@ class JsonPath
     scanner = StringScanner.new(path)
     @path = []
     bracket_count = 0
-    while not scanner.eos?
+    while !scanner.eos?
       if token = scanner.scan(/\$/)
-        @path << token
+        @path << Root.new
       elsif token = scanner.scan(/@/)
-        @path << token
+        @path << Current.new
       elsif token = scanner.scan(/[a-zA-Z0-9_-]+/)
         @path << "['#{token}']"
       elsif token = scanner.scan(/'(.*?)'/)
@@ -39,15 +44,17 @@ class JsonPath
         end
         @path << token
       elsif token = scanner.scan(/\.\./)
-        @path << token
+        @path << Any.new
       elsif scanner.scan(/\./)
-        nil
+        # ignore
       elsif token = scanner.scan(/\*/)
-        @path << token
-      elsif token = scanner.scan(/[><=] \d+/)
-        @path.last << token
-      elsif token = scanner.scan(/./)
-        @path.last << token
+        @path << Star.new
+      #elsif token = scanner.scan(/[><=] \d+/)
+      #  puts "token: #{token.inspect}"
+      #  @path.last << token
+      #elsif token = scanner.scan(/./)
+      #  puts "char: #{token.inspect}"
+      #  @path.last << token
       end
     end
   end

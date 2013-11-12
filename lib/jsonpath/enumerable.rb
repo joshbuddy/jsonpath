@@ -14,11 +14,11 @@ class JsonPath
       @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
       case expr = @path[pos]
-      when '*', '..'
+      when Any, Star
         each(context, key, pos + 1, &blk)
-      when '$'
+      when Root
         each(context, key, pos + 1, &blk) if node == @object
-      when '@'
+      when Current
         each(context, key, pos + 1, &blk)
       when /^\[(.*)\]$/
         expr[1,expr.size - 2].split(',').each do |sub_path|
@@ -54,7 +54,7 @@ class JsonPath
                 end_idx = (array_args[1] && process_function_or_literal(array_args[1], -1) || (sub_path.count(':') == 0 ? start_idx : -1))
                 next unless end_idx
                 if start_idx == end_idx
-                  next unless start_idx < node.size 
+                  next unless start_idx < node.size
                 end
               end
               start_idx %= node.size
@@ -62,6 +62,8 @@ class JsonPath
               step = process_function_or_literal(array_args[2], 1)
               next unless step
               (start_idx..end_idx).step(step) {|i| each(node, i, pos + 1, &blk)}
+            else
+              raise
             end
           end
         end
@@ -73,7 +75,7 @@ class JsonPath
         end
       end
 
-      if pos > 0 && @path[pos-1] == '..'
+      if pos > 0 && Any === @path[pos-1]
         case node
         when Hash  then node.each {|k, v| each(node, k, pos, &blk) }
         when Array then node.each_with_index {|n, i| each(node, i, pos, &blk) }
