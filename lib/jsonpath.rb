@@ -12,6 +12,13 @@ class JsonPath
   Current = Class.new
   Star = Class.new
   Any = Class.new
+  class ArrayAccess
+    attr_reader :value
+
+    def initialize(value)
+      @value = value
+    end
+  end
 
   attr_reader :path
 
@@ -26,9 +33,9 @@ class JsonPath
       elsif token = scanner.scan(/@/)
         @path << Current.new
       elsif token = scanner.scan(/[a-zA-Z0-9_-]+/)
-        @path << "['#{token}']"
+        @path << ArrayAccess.new("'#{token}'")
       elsif token = scanner.scan(/'(.*?)'/)
-        @path << "[#{token}]"
+        @path << ArrayAccess.new(token)
       elsif token = scanner.scan(/\[/)
         count = 1
         while !count.zero?
@@ -42,7 +49,7 @@ class JsonPath
             token << t
           end
         end
-        @path << token
+        @path << ArrayAccess.new(token[1, token.size - 2])
       elsif token = scanner.scan(/\.\./)
         @path << Any.new
       elsif scanner.scan(/\./)
