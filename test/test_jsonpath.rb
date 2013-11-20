@@ -99,7 +99,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 50, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 54, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -231,6 +231,21 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.new("$.data[?(@.type == 'admins')]").on(data)
   end
 
+  def test_support_at_sign_in_member_names
+    assert_equal [@object['store']['@id']], JsonPath.new("$.store.@id").on(@object)
+  end
+
+  def test_support_dollar_sign_in_member_names
+    assert_equal [@object['store']['$meta-data']],
+      JsonPath.new("$.store.$meta-data").on(@object)
+  end
+
+  def test_support_underscore_in_member_names
+    assert_equal [@object['store']['_links']],
+      JsonPath.new("$.store._links").on(@object)
+  end
+
+
   def example_object
     { 'store' => {
       'book' => [
@@ -278,7 +293,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'single-speed' => 'no',
         '2seater' => 'yes',
         'make:model' => 'Zippy Sweetwheeler'
-      }
+      },
+      "@id" => "http://example.org/store/42",
+      "$meta-data" => "whatevs",
+      "_links" => { "self" => {} }
     } }
   end
 end
