@@ -1,4 +1,4 @@
-#!/usr/local/env ruby
+#!/usr/bin/env ruby
 
 require 'jsonpath'
 require 'multi_json'
