@@ -94,6 +94,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal JsonPath.new('$..author').on(@object), JsonPath.on(@object, '$..author')
   end
 
+  def test_join
+    assert_equal JsonPath.new('$.store.book..author').on(@object), JsonPath.new('$.store').join('book..author').on(@object)
+  end
+
   def test_gsub
     @object2['store']['bicycle']['price'] += 10
     @object2['store']['book'][0]['price'] += 10
