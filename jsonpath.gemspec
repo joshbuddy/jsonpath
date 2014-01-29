@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files`.split("\n").select{|f| f =~ /^spec/}
   s.rubyforge_project = 'jsonpath'
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.licenses    = ['MIT']
 
   # dependencies
   s.add_runtime_dependency 'multi_json'
