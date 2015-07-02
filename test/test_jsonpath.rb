@@ -5,6 +5,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
     @object2 = example_object
   end
 
+  def test_bracket_matching
+    assert_raises(ArgumentError) {
+      JsonPath.new('$.store.book[0')
+    }
+    assert_raises(ArgumentError) {
+      JsonPath.new('$.store.book[0]]')
+    }
+  end
+
   def test_lookup_direct_path
     assert_equal 4, JsonPath.new('$.store.*').on(@object).first['book'].size
   end

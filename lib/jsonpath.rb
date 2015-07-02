@@ -14,7 +14,6 @@ class JsonPath
     @opts = opts
     scanner = StringScanner.new(path)
     @path = []
-    bracket_count = 0
     while not scanner.eos?
       if token = scanner.scan(/\$/)
         @path << token
@@ -33,11 +32,15 @@ class JsonPath
           elsif t = scanner.scan(/\]/)
             token << t
             count -= 1
-          elsif t = scanner.scan(/[^\[\]]*/)
+          elsif t = scanner.scan(/[^\[\]]+/)
             token << t
+          elsif scanner.eos?
+            raise ArgumentError, 'unclosed bracket'
           end
         end
         @path << token
+      elsif token = scanner.scan(/\]/)
+        raise ArgumentError, 'unmatched closing bracket'
       elsif token = scanner.scan(/\.\./)
         @path << token
       elsif scanner.scan(/\./)
