@@ -8,7 +8,7 @@ class JsonPath
 
   PATH_ALL = '$..*'
 
-  attr_reader :path
+  attr_accessor :path
 
   def initialize(path, opts = nil)
     @opts = opts
@@ -55,6 +55,12 @@ class JsonPath
     end
   end
 
+  def join(join_path)
+    res = deep_clone
+    res.path += JsonPath.new(join_path).path
+    res
+  end
+
   def on(obj_or_str)
     enum_on(obj_or_str).to_a
   end
@@ -79,5 +85,9 @@ class JsonPath
   private
   def self.process_object(obj_or_str)
     obj_or_str.is_a?(String) ? MultiJson.decode(obj_or_str) : obj_or_str
+  end
+
+  def deep_clone
+    Marshal.load Marshal.dump(self)
   end
 end
