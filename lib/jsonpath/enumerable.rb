@@ -106,7 +106,7 @@ class JsonPath
         return nil unless allow_eval? && @_current_node
         identifiers = /@?(\.\w+)+/.match(exp) || []
 
-        if !identifiers.nil?
+        if !identifiers.empty?
           exp_to_eval = exp.dup
           exp_to_eval[identifiers[0]] = identifiers[0].split('.').map{|el| el == '@' ? '@_current_node' : "['#{el}']"}.join
           begin
