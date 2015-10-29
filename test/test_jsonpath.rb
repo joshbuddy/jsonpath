@@ -165,6 +165,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [23], JsonPath.new("$..book[?(@.price > 20)].price").on(@object)
   end
 
+  def test_support_filter_by_childnode_value_over_childnode_and_select_child_key
+    assert_equal ["Osennie Vizity"], JsonPath.new("$..book[?(@.written.year == 1996)].title").on(@object)
+  end
+  
   def example_object
     { "store"=> {
       "book" => [
@@ -189,6 +193,27 @@ class TestJsonpath < MiniTest::Unit::TestCase
           "title"=> "The Lord of the Rings",
           "isbn"=> "0-395-19395-8",
           "price"=> 23
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Imperatory Illuziy",
+          "written" => {
+              "year" => 1995
+          }
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Osennie Vizity",
+          "written" => {
+              "year" => 1996
+          }
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Ne vremya dlya drakonov",
+          "written" => {
+              "year" => 1997
+          }
         }
       ],
     "bicycle"=> {
