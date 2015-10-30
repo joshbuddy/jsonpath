@@ -115,8 +115,16 @@ class JsonPath
             return default
           end
         end
+
         # otherwise eval as is
-        eval(exp.gsub(/@/, '@_current_node'))
+        # TODO: this eval is wrong, because hash accessor could be nil and nil cannot be compared with anything,
+        # for instance, @_current_node['price'] - we can't be sure that 'price' are in every node, but it's only in several nodes
+        # I wrapped this eval into rescue returning false when error, but this eval should be refactored.
+        begin
+          eval(exp.gsub(/@/, '@_current_node'))
+        rescue
+          false
+        end
       elsif exp.empty?
         default
       else
