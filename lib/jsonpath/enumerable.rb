@@ -104,19 +104,27 @@ class JsonPath
         default
       elsif exp[0] == ?(
         return nil unless allow_eval? && @_current_node
-        match_result = /@\.(\p{Word}+)/.match(exp) || []
-        identifier = match_result[1]
-        # if there's no such method - convert into hash subscript
-        if !identifier.nil? && !@_current_node.methods.include?(identifier.to_sym)
-          exp_to_eval = exp.gsub(/@/, '@_current_node').gsub(/@_current_node.#{identifier}/,"@_current_node['#{identifier}']")
+        identifiers = /@?(\.(\w+))+/.match(exp)
+
+        if !identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)
+          exp_to_eval = exp.dup
+          exp_to_eval[identifiers[0]] = identifiers[0].split('.').map{|el| el == '@' ? '@_current_node' : "['#{el}']"}.join
           begin
             return eval(exp_to_eval)
           rescue StandardError # if eval failed because of bad arguments or missing methods
             return default
           end
         end
+
         # otherwise eval as is
-        eval(exp.gsub(/@/, '@_current_node'))
+        # TODO: this eval is wrong, because hash accessor could be nil and nil cannot be compared with anything,
+        # for instance, @_current_node['price'] - we can't be sure that 'price' are in every node, but it's only in several nodes
+        # I wrapped this eval into rescue returning false when error, but this eval should be refactored.
+        begin
+          eval(exp.gsub(/@/, '@_current_node'))
+        rescue
+          false
+        end
       elsif exp.empty?
         default
       else

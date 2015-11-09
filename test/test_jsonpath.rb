@@ -15,7 +15,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_lookup_direct_path
-    assert_equal 4, JsonPath.new('$.store.*').on(@object).first['book'].size
+    assert_equal 7, JsonPath.new('$.store.*').on(@object).first['book'].size
   end
 
   def test_lookup_missing_element
@@ -27,7 +27,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
       @object['store']['book'][0]['author'],
       @object['store']['book'][1]['author'],
       @object['store']['book'][2]['author'],
-      @object['store']['book'][3]['author']
+      @object['store']['book'][3]['author'],
+      @object['store']['book'][4]['author'],
+      @object['store']['book'][5]['author'],
+      @object['store']['book'][6]['author']
     ], JsonPath.new('$..author').on(@object)
   end
 
@@ -43,15 +46,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_recognize_array_splices
     assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[0:1:1]').on(@object)
-    assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new('$..book[1::2]').on(@object)
-    assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new('$..book[::2]').on(@object)
-    assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new('$..book[:-2:2]').on(@object)
-    assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new('$..book[2::]').on(@object)
+    assert_equal [@object['store']['book'][1], @object['store']['book'][3], @object['store']['book'][5]], JsonPath.new('$..book[1::2]').on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][2], @object['store']['book'][4], @object['store']['book'][6]], JsonPath.new('$..book[::2]').on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new('$..book[:-5:2]').on(@object)
+    assert_equal [@object['store']['book'][5], @object['store']['book'][6]], JsonPath.new('$..book[5::]').on(@object)
   end
 
   def test_recognize_array_comma
     assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[0,1]').on(@object)
-    assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new('$..book[2,-1::]').on(@object)
+    assert_equal [@object['store']['book'][2], @object['store']['book'][6]], JsonPath.new('$..book[2,-1::]').on(@object)
   end
 
   def test_recognize_filters
@@ -84,15 +87,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_recognize_array_with_evald_index
-    assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-2)]').on(@object)
+    assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-5)]').on(@object)
   end
 
   def test_use_first
-    assert_equal @object['store']['book'][2], JsonPath.new('$..book[(@.length-2)]').first(@object)
+    assert_equal @object['store']['book'][2], JsonPath.new('$..book[(@.length-5)]').first(@object)
   end
 
   def test_counting
-    assert_equal 31, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 49, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -144,7 +147,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_wildcard
-    assert_equal @object['store']['book'].collect{|e| e['price']}, JsonPath.on(@object, '$..book[*].price')
+    assert_equal @object['store']['book'].collect{|e| e['price']}.compact, JsonPath.on(@object, '$..book[*].price')
   end
 
   def test_wildcard_empty_array
@@ -165,6 +168,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [23], JsonPath.new("$..book[?(@.price > 20)].price").on(@object)
   end
 
+  def test_support_filter_by_childnode_value_over_childnode_and_select_child_key
+    assert_equal ["Osennie Vizity"], JsonPath.new("$..book[?(@.written.year == 1996)].title").on(@object)
+  end
+  
   def example_object
     { "store"=> {
       "book" => [
@@ -189,6 +196,27 @@ class TestJsonpath < MiniTest::Unit::TestCase
           "title"=> "The Lord of the Rings",
           "isbn"=> "0-395-19395-8",
           "price"=> 23
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Imperatory Illuziy",
+          "written" => {
+              "year" => 1995
+          }
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Osennie Vizity",
+          "written" => {
+              "year" => 1996
+          }
+        },
+        { "category"=> "russian_fiction",
+          "author"=> "Lukyanenko",
+          "title"=> "Ne vremya dlya drakonov",
+          "written" => {
+              "year" => 1997
+          }
         }
       ],
     "bicycle"=> {
