@@ -81,7 +81,7 @@ JsonPath.new('$..book[::2]').on(json)
 ...and evals.
 
 ~~~~~ {ruby}
-JsonPath.new('$..price[?(@ < 20)]').on(json)
+JsonPath.new('$..price[?(@ < 10)]').on(json)
 # => [8.95, 8.99]
 ~~~~~
 
