@@ -155,7 +155,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.on(object, "$..bicycle.tire[*]")
   end
 
-  def test_support_filter_by_childnode_value
+  def test_support_filter_by_array_childnode_value
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@.price > 20)]").on(@object)
   end
 
@@ -171,7 +171,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_support_filter_by_childnode_value_over_childnode_and_select_child_key
     assert_equal ["Osennie Vizity"], JsonPath.new("$..book[?(@.written.year == 1996)].title").on(@object)
   end
-  
+
+  def test_support_filter_by_object_childnode_value
+    data = {
+      "data" => {
+        "type" => "users",
+        "id" => "123"
+      }
+    }
+    assert_equal [{"type"=>"users", "id"=>"123"}], JsonPath.new("$.data[?(@.type == 'users')]").on(data)
+    assert_equal []     , JsonPath.new("$.data[?(@.type == 'admins')]").on(data)
+  end
+
   def example_object
     { "store"=> {
       "book" => [
