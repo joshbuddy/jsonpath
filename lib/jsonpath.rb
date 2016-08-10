@@ -19,7 +19,7 @@ class JsonPath
         @path << token
       elsif token = scanner.scan(/@/)
         @path << token
-      elsif token = scanner.scan(/[a-zA-Z0-9_-]+/)
+      elsif token = scanner.scan(/[a-zA-Z0-9:_-]+/)
         @path << "['#{token}']"
       elsif token = scanner.scan(/'(.*?)'/)
         @path << "[#{token}]"
