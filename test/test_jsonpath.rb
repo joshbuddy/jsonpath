@@ -82,6 +82,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
      assert_equal [@object['store']['bicycle']['single-speed']], JsonPath.new('$.store.bicycle.single-speed').on(@object)
   end
 
+  def test_path_with_colon
+     assert_equal [@object['store']['bicycle']['make:model']], JsonPath.new('$.store.bicycle.make:model').on(@object)
+  end
+
   def test_paths_with_numbers
     assert_equal [@object['store']['bicycle']['2seater']], JsonPath.new('$.store.bicycle.2seater').on(@object)
   end
@@ -95,7 +99,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 49, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 50, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -224,7 +228,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
       "price"=> 20,
       "catalogue_number" => 12345,
       "single-speed" => "no",
-      "2seater" => "yes"}
+      "2seater" => "yes",
+      "make:model" => "Zippy Sweetwheeler"}
     } }
   end
 
