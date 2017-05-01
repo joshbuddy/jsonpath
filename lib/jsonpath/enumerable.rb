@@ -33,7 +33,7 @@ class JsonPath
         end
       end
 
-      if pos > 0 && @path[pos - 1] == '..'
+      if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
         case node
         when Hash  then node.each { |k, _| each(node, k, pos, &blk) }
         when Array then node.each_with_index { |_, i| each(node, i, pos, &blk) }

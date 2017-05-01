@@ -3,9 +3,6 @@ Bundler::GemHelper.install_tasks
 
 task :test do
   $LOAD_PATH << 'lib'
-  require 'minitest/autorun'
-  require 'phocus'
-  require 'jsonpath'
   Dir['./test/**/test_*.rb'].each { |test| require test }
 end
 
