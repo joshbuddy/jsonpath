@@ -105,6 +105,10 @@ enum.any?{ |c| c == 'red' }
 
 You can optionally prevent eval from being called on sub-expressions by passing in :allow_eval => false to the constructor.
 
+### More examples
+
+For more usage examples and variations on paths, please visit the tests. There are some more complex ones as well.
+
 ### Manipulation
 
 If you'd like to do substitution in a json object, you can use `#gsub` or `#gsub!` to modify the object in place.
@@ -130,3 +134,7 @@ o = JsonPath.for(json).
   to_hash
 # => {"candy" => "big turks"}
 ~~~~~
+
+# Contributions
+
+Please feel free to submit an Issue or a Pull Request any time you feel like you would like to contribute. Thank you!

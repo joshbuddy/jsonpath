@@ -15,7 +15,7 @@ usage unless ARGV[0]
 
 jsonpath = JsonPath.new(ARGV[0])
 case ARGV[1]
-when nil #stdin
+when nil # stdin
   puts MultiJson.encode(jsonpath.on(MultiJson.decode(STDIN.read)))
 when String
   puts MultiJson.encode(jsonpath.on(MultiJson.decode(File.exist?(ARGV[1]) ? File.read(ARGV[1]) : ARGV[1])))
