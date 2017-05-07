@@ -64,10 +64,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
   end
 
-  if RUBY_VERSION[/^1\.9/]
-    def test_recognize_filters_on_val
-      assert_equal [@object['store']['book'][1]['price'], @object['store']['book'][3]['price'], @object['store']['bicycle']['price']], JsonPath.new('$..price[?(@ > 10)]').on(@object)
-    end
+  def test_or_operator
+    assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] == 13 || @['price'] == 23)]").on(@object)
+  end
+
+  def test_and_operator
+    assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
+  end
+
+  def test_and_operator_with_more_results
+    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
   end
 
   def test_no_eval
