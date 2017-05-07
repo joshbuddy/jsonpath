@@ -109,6 +109,28 @@ You can optionally prevent eval from being called on sub-expressions by passing 
 
 For more usage examples and variations on paths, please visit the tests. There are some more complex ones as well.
 
+### Conditional Operators Are Also Supported
+
+```ruby
+  def test_or_operator
+    assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] == 13 || @['price'] == 23)]").on(@object)
+  end
+
+  def test_and_operator
+    assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
+  end
+
+  def test_and_operator_with_more_results
+    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
+  end
+```
+
+### Running an individual test
+
+```ruby
+ruby -Ilib:../lib test/test_jsonpath.rb --name test_wildcard_on_intermediary_element_v6
+```
+
 ### Manipulation
 
 If you'd like to do substitution in a json object, you can use `#gsub` or `#gsub!` to modify the object in place.
