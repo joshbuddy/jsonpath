@@ -76,6 +76,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
   end
 
+  def test_eval_with_floating_point
+    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23.0 && @['price'] > 9.0)]").on(@object)
+  end
+
   def test_no_eval
     assert_equal [], JsonPath.new('$..book[(@.length-2)]', allow_eval: false).on(@object)
   end

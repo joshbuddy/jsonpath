@@ -115,7 +115,7 @@ class JsonPath
       return Integer(exp) if exp[0] != '('
       return nil unless allow_eval? && @_current_node
 
-      identifiers = /@?(\.(\w+))+/.match(exp)
+      identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
       # puts JsonPath.on(@_current_node, "#{identifiers}") unless identifiers.nil? ||
       #                                                           @_current_node
       #                                                           .methods
@@ -123,7 +123,6 @@ class JsonPath
 
       unless identifiers.nil? ||
              @_current_node.methods.include?(identifiers[2].to_sym)
-
         exp_to_eval = exp.dup
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
           el == '@' ? '@_current_node' : "['#{el}']"
