@@ -109,7 +109,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 54, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 57, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -255,6 +255,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
       JsonPath.new("$.store._links").on(@object)
   end
 
+  def test_filter_support_include
+    #assert_equal true, JsonPath.new("$.store.book[(@.tags == 'asdf3')]").on(@object)
+    assert_equal true, JsonPath.new("$.store.book..tags[?(@ == 'asdf')]").on(@object)
+  end
 
   def example_object
     { 'store' => {
@@ -262,7 +266,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
         { 'category' => 'reference',
           'author' => 'Nigel Rees',
           'title' => 'Sayings of the Century',
-          'price' => 9 },
+          'price' => 9,
+          'tags' => ['asdf', 'asdf2']},
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',

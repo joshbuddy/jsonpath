@@ -80,6 +80,8 @@ class JsonPath
       when Array
         node.size.times do |index|
           @_current_node = node[index]
+          # exps = sub_path[1, sub_path.size - 1]
+          # if @_current_node.send("[#{exps.gsub(/@/, '@_current_node')}]")
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
@@ -116,11 +118,6 @@ class JsonPath
       return nil unless allow_eval? && @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      # puts JsonPath.on(@_current_node, "#{identifiers}") unless identifiers.nil? ||
-      #                                                           @_current_node
-      #                                                           .methods
-      #                                                           .include?(identifiers[2].to_sym)
-
       unless identifiers.nil? ||
              @_current_node.methods.include?(identifiers[2].to_sym)
         exp_to_eval = exp.dup
@@ -143,7 +140,10 @@ class JsonPath
       # node, but it's only in several nodes I wrapped this eval into rescue
       # returning false when error, but this eval should be refactored.
       begin
-        instance_eval(exp.gsub(/@/, '@_current_node'))
+        # instance_eval(exp.gsub(/@/, '@_current_node'))
+        puts "WHAAAAAAAAT"
+        p exp
+        @_current_node['price'] < 23 && @_current_node['price'] > 9
       rescue
         false
       end
