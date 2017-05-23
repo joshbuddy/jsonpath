@@ -41,6 +41,8 @@ class JsonPath
         @_current_node[element] <= operand.strip.to_i
       when '=='
         @_current_node[element] == operand.strip.to_i
+      when '!='
+        @_current_node[element] != operand.strip.to_i
       end
     end
   end
