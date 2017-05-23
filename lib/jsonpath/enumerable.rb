@@ -140,10 +140,14 @@ class JsonPath
       # node, but it's only in several nodes I wrapped this eval into rescue
       # returning false when error, but this eval should be refactored.
       begin
-        # instance_eval(exp.gsub(/@/, '@_current_node'))
-        puts "WHAAAAAAAAT"
-        p exp
-        @_current_node['price'] < 23 && @_current_node['price'] > 9
+        JsonPath::Parser.new(@_current_node).parse(exp)
+        # proc do
+        #   $SAFE = 1
+        #   instance_eval(exp)
+        # end.call
+        # puts "WHAAAAAAAAT"
+        # p exp
+        # @_current_node['price'] < 23 && @_current_node['price'] > 9
       rescue
         false
       end
