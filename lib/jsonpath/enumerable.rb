@@ -130,11 +130,7 @@ class JsonPath
           return default
         end
       end
-      begin
-        JsonPath::Parser.new(@_current_node).parse(exp)
-      rescue
-        false
-      end
+      JsonPath::Parser.new(@_current_node).parse(exp)
     end
   end
 end
