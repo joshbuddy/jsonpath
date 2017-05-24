@@ -9,7 +9,6 @@ class JsonPath
 
     def parse(exp)
       exp = exp.gsub(/@/, '').gsub(/[\(\)]/, '')
-      p exp
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
@@ -20,35 +19,19 @@ class JsonPath
           return @_current_node.send(sym.to_sym).send(op.to_sym, num.to_i)
         end
         if t = scanner.scan(/\['\w+'\]+/)
-          puts "t: #{t}"
-          element << t
+          elements << t.gsub(/\[|\]|'|\s+/, '')
         elsif t = scanner.scan(/\s+[<>=][<>=]?\s+?/)
           operator = t
-        elsif t = scanner.scan(/(\d+)?[.,]?(\d+)?/)
-          operand = t
+        elsif t = scanner.scan(/'?(\w+)?[.,]?(\w+)?'?/)
+          operand = t.delete("'").strip
         elsif t = scanner.scan(/.*/)
           raise 'Could not process symbol.'
         end
       end
-      puts "Element: #{sym}"
-      element = element.gsub(/\[|\]|'|\s+/, '') if element
-      return false unless @_current_node[element]
-      return true if operator.nil? && @_current_node.dig(element)
-      @_current_node.dig(element).send(operator.strip, operand.strip.to_i)
-      # case operator.strip
-      # when '<'
-      #   @_current_node[element] < operand.strip.to_i
-      # when '>'
-      #   @_current_node[element] > operand.strip.to_i
-      # when '>='
-      #   @_current_node[element] >= operand.strip.to_i
-      # when '<='
-      #   @_current_node[element] <= operand.strip.to_i
-      # when '=='
-      #   @_current_node[element] == operand.strip.to_i
-      # when '!='
-      #   @_current_node[element] != operand.strip.to_i
-      # end
+      return false unless @_current_node.dig(*elements)
+      return true if operator.nil? && @_current_node.dig(*elements)
+      operand = operand.to_f if operand.to_i.to_s == operand || operand.to_f.to_s == operand
+      @_current_node.dig(*elements).send(operator.strip, operand)
     end
   end
 end

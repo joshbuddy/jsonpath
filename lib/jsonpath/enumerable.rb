@@ -124,11 +124,8 @@ class JsonPath
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
           el == '@' ? '@' : "['#{el}']"
         end.join
-        p exp_to_eval
         begin
           return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
-          # return instance_eval(exp_to_eval)
-          # if eval failed because of bad arguments or missing methods
         rescue StandardError
           return default
         end
