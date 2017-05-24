@@ -122,32 +122,19 @@ class JsonPath
              @_current_node.methods.include?(identifiers[2].to_sym)
         exp_to_eval = exp.dup
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
-          el == '@' ? '@_current_node' : "['#{el}']"
+          el == '@' ? '@' : "['#{el}']"
         end.join
-
+        p exp_to_eval
         begin
-          return instance_eval(exp_to_eval)
+          return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
+          # return instance_eval(exp_to_eval)
           # if eval failed because of bad arguments or missing methods
         rescue StandardError
           return default
         end
       end
-
-      # otherwise eval as is
-      # TODO: this eval is wrong, because hash accessor could be nil and nil
-      # cannot be compared with anything, for instance,
-      # @a_current_node['price'] - we can't be sure that 'price' are in every
-      # node, but it's only in several nodes I wrapped this eval into rescue
-      # returning false when error, but this eval should be refactored.
       begin
         JsonPath::Parser.new(@_current_node).parse(exp)
-        # proc do
-        #   $SAFE = 1
-        #   instance_eval(exp)
-        # end.call
-        # puts "WHAAAAAAAAT"
-        # p exp
-        # @_current_node['price'] < 23 && @_current_node['price'] > 9
       rescue
         false
       end
