@@ -64,21 +64,21 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
   end
 
-  # def test_or_operator
-  #   assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] == 13 || @['price'] == 23)]").on(@object)
-  # end
+  def test_or_operator
+    assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] == 13 || @['price'] == 23)]").on(@object)
+  end
 
-  # def test_and_operator
-  #   assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
-  # end
+  def test_and_operator
+    assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
+  end
 
-  # def test_and_operator_with_more_results
-  #   assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
-  # end
+  def test_and_operator_with_more_results
+    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
+  end
 
-  # def test_eval_with_floating_point
-  #   assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23.0 && @['price'] > 9.0)]").on(@object)
-  # end
+  def test_eval_with_floating_point
+    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23.0 && @['price'] > 9.0)]").on(@object)
+  end
 
   def test_eval_with_floating_point
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] == 13.0)]").on(@object)

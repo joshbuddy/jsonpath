@@ -8,6 +8,20 @@ class JsonPath
     end
 
     def parse(exp)
+      exps = exp.split(/(&&)|(\|\|)/)
+      ret = parse_exp(exps.shift)
+      exps.each_with_index do |item, index|
+        case item
+        when '&&'
+          ret &&= parse_exp(exps[index + 1])
+        when '||'
+          ret ||= parse_exp(exps[index + 1])
+        end
+      end
+      ret
+    end
+
+    def parse_exp(exp)
       exp = exp.gsub(/@/, '').gsub(/[\(\)]/, '')
       scanner = StringScanner.new(exp)
       elements = []
@@ -22,10 +36,10 @@ class JsonPath
           elements << t.gsub(/\[|\]|'|\s+/, '')
         elsif t = scanner.scan(/\s+[<>=][<>=]?\s+?/)
           operator = t
-        elsif t = scanner.scan(/'?(\w+)?[.,]?(\w+)?'?/)
+        elsif t = scanner.scan(/(\s+)?'?(\w+)?[.,]?(\w+)?'?(\s+)?/) # @TODO: At this point I should trim somewhere...
           operand = t.delete("'").strip
         elsif t = scanner.scan(/.*/)
-          raise 'Could not process symbol.'
+          raise "Could not process symbol: #{t}"
         end
       end
       el = dig(elements, @_current_node)
@@ -37,7 +51,7 @@ class JsonPath
 
     private
 
-    # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3.
+    # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3
     def dig(keys, hash)
       return nil unless hash.key?(keys.first)
       return hash.fetch(keys.first) if keys.size == 1
