@@ -28,10 +28,21 @@ class JsonPath
           raise 'Could not process symbol.'
         end
       end
-      return false unless @_current_node.dig(*elements)
-      return true if operator.nil? && @_current_node.dig(*elements)
+      el = dig(elements, @_current_node)
+      return false unless el
+      return true if operator.nil? && el
       operand = operand.to_f if operand.to_i.to_s == operand || operand.to_f.to_s == operand
-      @_current_node.dig(*elements).send(operator.strip, operand)
+      el.send(operator.strip, operand)
+    end
+
+    private
+
+    # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3.
+    def dig(keys, hash)
+      return nil unless hash.key?(keys.first)
+      return hash.fetch(keys.first) if keys.size == 1
+      prev = keys.shift
+      dig(keys, hash.fetch(prev))
     end
   end
 end
