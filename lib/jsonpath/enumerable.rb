@@ -1,19 +1,12 @@
 class JsonPath
   class Enumerable
     include ::Enumerable
-    attr_reader :allow_eval
-    alias_method :allow_eval?, :allow_eval
 
     def initialize(path, object, mode, options = nil)
       @path = path.path
       @object = object
       @mode = mode
       @options = options
-      @allow_eval = if @options && @options.key?(:allow_eval)
-                      @options[:allow_eval]
-                    else
-                      true
-                    end
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
@@ -27,10 +20,6 @@ class JsonPath
         each(context, key, pos + 1, &blk) if node == @object
       when /^\[(.*)\]$/
         handle_wildecard(node, expr, context, key, pos, &blk)
-      else
-        if pos == (@path.size - 1) && node && allow_eval?
-          yield_value(blk, context, key) if instance_eval("node #{@path[pos]}")
-        end
       end
 
       if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
@@ -75,7 +64,6 @@ class JsonPath
     end
 
     def handle_question_mark(sub_path, node, pos, &blk)
-      raise 'Cannot use ?(...) unless eval is enabled' unless allow_eval?
       case node
       when Array
         node.size.times do |index|
@@ -115,7 +103,7 @@ class JsonPath
     def process_function_or_literal(exp, default = nil)
       return default if exp.nil? || exp.empty?
       return Integer(exp) if exp[0] != '('
-      return nil unless allow_eval? && @_current_node
+      return nil unless @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
       unless identifiers.nil? ||

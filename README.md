@@ -103,8 +103,6 @@ enum.any?{ |c| c == 'red' }
 # => true
 ```
 
-You can optionally prevent eval from being called on sub-expressions by passing in :allow_eval => false to the constructor.
-
 ### More examples
 
 For more usage examples and variations on paths, please visit the tests. There are some more complex ones as well.
