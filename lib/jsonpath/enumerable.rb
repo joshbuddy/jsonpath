@@ -1,19 +1,12 @@
 class JsonPath
   class Enumerable
     include ::Enumerable
-    attr_reader :allow_eval
-    alias_method :allow_eval?, :allow_eval
 
     def initialize(path, object, mode, options = nil)
       @path = path.path
       @object = object
       @mode = mode
       @options = options
-      @allow_eval = if @options && @options.key?(:allow_eval)
-                      @options[:allow_eval]
-                    else
-                      true
-                    end
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
@@ -27,10 +20,6 @@ class JsonPath
         each(context, key, pos + 1, &blk) if node == @object
       when /^\[(.*)\]$/
         handle_wildecard(node, expr, context, key, pos, &blk)
-      else
-        if pos == (@path.size - 1) && node && allow_eval?
-          yield_value(blk, context, key) if instance_eval("node #{@path[pos]}")
-        end
       end
 
       if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
@@ -75,11 +64,12 @@ class JsonPath
     end
 
     def handle_question_mark(sub_path, node, pos, &blk)
-      raise 'Cannot use ?(...) unless eval is enabled' unless allow_eval?
       case node
       when Array
         node.size.times do |index|
           @_current_node = node[index]
+          # exps = sub_path[1, sub_path.size - 1]
+          # if @_current_node.send("[#{exps.gsub(/@/, '@_current_node')}]")
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
@@ -113,40 +103,22 @@ class JsonPath
     def process_function_or_literal(exp, default = nil)
       return default if exp.nil? || exp.empty?
       return Integer(exp) if exp[0] != '('
-      return nil unless allow_eval? && @_current_node
+      return nil unless @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      # puts JsonPath.on(@_current_node, "#{identifiers}") unless identifiers.nil? ||
-      #                                                           @_current_node
-      #                                                           .methods
-      #                                                           .include?(identifiers[2].to_sym)
-
       unless identifiers.nil? ||
              @_current_node.methods.include?(identifiers[2].to_sym)
         exp_to_eval = exp.dup
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
-          el == '@' ? '@_current_node' : "['#{el}']"
+          el == '@' ? '@' : "['#{el}']"
         end.join
-
         begin
-          return instance_eval(exp_to_eval)
-          # if eval failed because of bad arguments or missing methods
+          return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
         rescue StandardError
           return default
         end
       end
-
-      # otherwise eval as is
-      # TODO: this eval is wrong, because hash accessor could be nil and nil
-      # cannot be compared with anything, for instance,
-      # @a_current_node['price'] - we can't be sure that 'price' are in every
-      # node, but it's only in several nodes I wrapped this eval into rescue
-      # returning false when error, but this eval should be refactored.
-      begin
-        instance_eval(exp.gsub(/@/, '@_current_node'))
-      rescue
-        false
-      end
+      JsonPath::Parser.new(@_current_node).parse(exp)
     end
   end
 end

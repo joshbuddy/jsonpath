@@ -1,3 +1,3 @@
 class JsonPath
-  VERSION = '0.7.2'.freeze
+  VERSION = '0.8.2'.freeze
 end
