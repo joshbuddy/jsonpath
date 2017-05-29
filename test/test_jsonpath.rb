@@ -255,10 +255,9 @@ class TestJsonpath < MiniTest::Unit::TestCase
       JsonPath.new("$.store._links").on(@object)
   end
 
-  # def test_filter_support_include
-  #   #assert_equal true, JsonPath.new("$.store.book[(@.tags == 'asdf3')]").on(@object)
-  #   assert_equal true, JsonPath.new("$.store.book..tags[?(@ == 'asdf')]").on(@object)
-  # end
+  def test_dig_return_string
+    assert_equal ['asdf'], JsonPath.new("$.store.book..tags[?(@ == 'asdf')]").on(@object)
+  end
 
   def example_object
     { 'store' => {
