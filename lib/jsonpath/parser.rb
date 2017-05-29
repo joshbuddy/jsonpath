@@ -53,6 +53,7 @@ class JsonPath
 
     # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3
     def dig(keys, hash)
+      return hash unless hash.is_a? Hash
       return nil unless hash.key?(keys.first)
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
