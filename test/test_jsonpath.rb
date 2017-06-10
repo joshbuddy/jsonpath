@@ -257,6 +257,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_dig_return_string
     assert_equal ['asdf'], JsonPath.new("$.store.book..tags[?(@ == 'asdf')]").on(@object)
+    assert_equal [], JsonPath.new("$.store.book..tags[?(@ == 'not_asdf')]").on(@object)
+  end
+
+  def test_slash_in_value
+    data = {
+      'data' => {
+        'type' => 'mps/awesome'
+      }
+    }
+    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.data[?(@.type == \"mps/awesome\")]").on(data)
   end
 
   def example_object
