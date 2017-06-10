@@ -36,7 +36,7 @@ class JsonPath
           elements << t.gsub(/\[|\]|'|\s+/, '')
         elsif t = scanner.scan(/(\s+)?[<>=][<>=]?(\s+)?/)
           operator = t
-        elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/) # @TODO: At this point I should trim somewhere...
+        elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           operand = t.delete("'").strip
         elsif t = scanner.scan(/.*/)
           raise "Could not process symbol: #{t}"
