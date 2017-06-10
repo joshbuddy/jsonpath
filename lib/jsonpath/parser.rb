@@ -22,7 +22,7 @@ class JsonPath
     end
 
     def parse_exp(exp)
-      exp = exp.gsub(/@/, '').gsub(/[\(\)]/, '')
+      exp = exp.gsub(/@/, '').gsub(/[\(\)]/, '').gsub(/"/, '\'').strip
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
@@ -34,9 +34,9 @@ class JsonPath
         end
         if t = scanner.scan(/\['\w+'\]+/)
           elements << t.gsub(/\[|\]|'|\s+/, '')
-        elsif t = scanner.scan(/\s+[<>=][<>=]?\s+?/)
+        elsif t = scanner.scan(/(\s+)?[<>=][<>=]?(\s+)?/)
           operator = t
-        elsif t = scanner.scan(/(\s+)?'?(\w+)?[.,]?(\w+)?'?(\s+)?/) # @TODO: At this point I should trim somewhere...
+        elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           operand = t.delete("'").strip
         elsif t = scanner.scan(/.*/)
           raise "Could not process symbol: #{t}"
@@ -45,6 +45,7 @@ class JsonPath
       el = dig(elements, @_current_node)
       return false unless el
       return true if operator.nil? && el
+
       operand = operand.to_f if operand.to_i.to_s == operand || operand.to_f.to_s == operand
       el.send(operator.strip, operand)
     end
