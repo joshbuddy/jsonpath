@@ -76,7 +76,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
   end
 
-  def test_eval_with_floating_point
+  def test_eval_with_floating_point_and_and
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23.0 && @['price'] > 9.0)]").on(@object)
   end
 
@@ -267,6 +267,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
       }
     }
     assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.data[?(@.type == \"mps/awesome\")]").on(data)
+  end
+
+  def test_floating_point_with_precision_marker
+    data = {
+      'data' => {
+        'type' => 0.00001
+      }
+    }
+    assert_equal [{"type"=>0.00001}], JsonPath.new("$.data[?(@.type == 0.00001)]").on(data)
   end
 
   def example_object

@@ -46,7 +46,7 @@ class JsonPath
       return false unless el
       return true if operator.nil? && el
 
-      operand = operand.to_f if operand.to_i.to_s == operand || operand.to_f.to_s == operand
+      operand = Float(operand) rescue operand
       el.send(operator.strip, operand)
     end
 
