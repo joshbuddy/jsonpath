@@ -170,6 +170,13 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal({ 'you' => nil }, h)
   end
 
+  def test_delete_for_array
+    before = JsonPath.on(@object, '$..store.book[1]')
+    JsonPath.for(@object).delete!('$..store.book[0]')
+    after = JsonPath.on(@object, '$..store.book[0]')
+    assert_equal(after, before, 'Before is the second element. After should have been equal to the next element after delete.')
+  end
+
   def test_at_sign_in_json_element
     data =
       { '@colors' =>
