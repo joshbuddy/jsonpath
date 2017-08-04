@@ -84,13 +84,18 @@ class JsonPath
     end
 
     def yield_value(blk, context, key)
+      key = Integer(key) rescue key if key
       case @mode
       when nil
         blk.call(key ? context[key] : context)
       when :compact
-        context.delete(key) if key && context[key].nil?
+        if key && context[key].nil?
+          key.is_a?(Integer) ? context.delete_at(key) : context.delete(key)
+        end
       when :delete
-        context.delete(key) if key
+        if key
+          key.is_a?(Integer) ? context.delete_at(key) : context.delete(key)
+        end
       when :substitute
         if key
           context[key] = blk.call(context[key])
