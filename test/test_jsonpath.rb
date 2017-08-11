@@ -285,6 +285,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{"type"=>0.00001}], JsonPath.new("$.data[?(@.type == 0.00001)]").on(data)
   end
 
+  def test_digits_only_string
+    data = {
+      'foo' => {
+        'type' => 'users',
+        'id' => '123'
+      }
+    }
+    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
+  end
+
   def example_object
     { 'store' => {
       'book' => [
