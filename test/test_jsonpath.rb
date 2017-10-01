@@ -295,6 +295,56 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
   end
 
+  def test_at_in_filter
+    jsonld = {
+      "mentions" => [
+         {
+            "name" => "Delimara Powerplant",
+            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
+            "@type" => "Place",
+            "geo" => {
+               "latitude" => 35.83020073454,
+               "longitude" => 14.55602645874
+            }
+         }
+      ]
+   }
+   assert_equal(['Place'], JsonPath.new("$..mentions[?(@['@type'] == 'Place')].@type").on(jsonld))
+  end
+
+  def test_dollar_in_filter
+    jsonld = {
+      "mentions" => [
+         {
+            "name" => "Delimara Powerplant",
+            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
+            "$type" => "Place",
+            "geo" => {
+               "latitude" => 35.83020073454,
+               "longitude" => 14.55602645874
+            }
+         }
+      ]
+   }
+   assert_equal(['Place'], JsonPath.new("$..mentions[?(@['$type'] == 'Place')].$type").on(jsonld))
+  end
+
+  def test_at_in_value
+    jsonld = {
+      "mentions" =>
+         {
+            "name" => "Delimara Powerplant",
+            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
+            "type" => "@Place",
+            "geo" => {
+               "latitude" => 35.83020073454,
+               "longitude" => 14.55602645874
+            }
+         }
+   }
+   assert_equal(['@Place'], JsonPath.new("$..mentions.type[?(@ == '@Place')]").on(jsonld))
+  end  
+
   def example_object
     { 'store' => {
       'book' => [

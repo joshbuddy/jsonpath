@@ -22,7 +22,7 @@ class JsonPath
     end
 
     def parse_exp(exp)
-      exp = exp.gsub(/@/, '').gsub(/[\(\)]/, '').gsub(/"/, '\'').strip
+      exp = exp.sub(/@/, '').gsub(/[\(\)]/, '').gsub(/"/, '\'').strip
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
@@ -32,7 +32,7 @@ class JsonPath
           num = scanner.scan(/\d+/)
           return @_current_node.send(sym.to_sym).send(op.to_sym, num.to_i)
         end
-        if t = scanner.scan(/\['\w+'\]+/)
+        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?]+'\]+/)
           elements << t.gsub(/\[|\]|'|\s+/, '')
         elsif t = scanner.scan(/(\s+)?[<>=][<>=]?(\s+)?/)
           operator = t
