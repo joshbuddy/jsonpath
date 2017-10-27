@@ -357,7 +357,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
          }
    }
    assert_equal(['@Place'], JsonPath.new("$..mentions.type[?(@ == '@Place')]").on(jsonld))
-  end  
+  end
+
+  def test_parens_in_value
+    data = {
+      'data' => {
+        'number' => '(492) 080-3961'
+      }
+    }
+    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
+  end
 
   def example_object
     { 'store' => {
