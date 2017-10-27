@@ -329,6 +329,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
    assert_equal(['Place'], JsonPath.new("$..mentions[?(@['$type'] == 'Place')].$type").on(jsonld))
   end
 
+  def test_underscore_in_filter
+    jsonld = {
+      "attributes" => [
+        {
+          "store" => [
+             { "with" => "urn" },
+             { "with_underscore" => "urn:1" }
+          ]
+        }
+      ]
+    }
+    assert_equal(['urn:1'], JsonPath.new("$.attributes..store[?(@['with_underscore'] == 'urn:1')].with_underscore").on(jsonld))
+  end
+
   def test_at_in_value
     jsonld = {
       "mentions" =>

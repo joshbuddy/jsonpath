@@ -32,7 +32,7 @@ class JsonPath
           num = scanner.scan(/\d+/)
           return @_current_node.send(sym.to_sym).send(op.to_sym, num.to_i)
         end
-        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?]+'\]+/)
+        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]+/)
           elements << t.gsub(/\[|\]|'|\s+/, '')
         elsif t = scanner.scan(/(\s+)?[<>=][<>=]?(\s+)?/)
           operator = t
