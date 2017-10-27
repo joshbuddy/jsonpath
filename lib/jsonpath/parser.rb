@@ -22,7 +22,7 @@ class JsonPath
     end
 
     def parse_exp(exp)
-      exp = exp.sub(/@/, '').gsub(/[\(\)]/, '').gsub(/"/, '\'').strip
+      exp = exp.sub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').gsub(/"/, '\'').strip
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
