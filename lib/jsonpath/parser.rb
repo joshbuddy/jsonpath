@@ -1,4 +1,5 @@
 require 'strscan'
+require 'to_regexp'
 
 class JsonPath
   # Parser parses and evaluates an expression passed to @_current_node.
@@ -34,10 +35,12 @@ class JsonPath
         end
         if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]+/)
           elements << t.gsub(/\[|\]|'|\s+/, '')
-        elsif t = scanner.scan(/(\s+)?[<>=][<>=]?(\s+)?/)
+        elsif t = scanner.scan(/(\s+)?[<>=][=~]?(\s+)?/)
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
-          operand = t.delete("'").strip
+          operand = operator.strip == "=~" ? t.to_regexp : t.delete("'").strip
+        elsif t = scanner.scan(/\/\w+\//)
+
         elsif t = scanner.scan(/.*/)
           raise "Could not process symbol: #{t}"
         end

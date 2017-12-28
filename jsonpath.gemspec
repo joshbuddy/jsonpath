@@ -29,5 +29,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest', '~> 2.2.0'
   s.add_development_dependency 'phocus'
   s.add_development_dependency 'bundler'
+  s.add_development_dependency 'to_regexp'
 end
 
