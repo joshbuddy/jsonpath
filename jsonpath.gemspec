@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
 
   # dependencies
   s.add_runtime_dependency 'multi_json'
+  s.add_runtime_dependency 'to_regexp', '~> 0.2.1'
   s.add_development_dependency 'code_stats'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'minitest', '~> 2.2.0'
