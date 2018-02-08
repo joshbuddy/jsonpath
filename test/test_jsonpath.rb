@@ -368,6 +368,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
   end
 
+
+  def test_boolean_parameter_value
+    data = {
+      'data' => [{
+        'isTrue' => true,
+        'name' => 'testname1',
+      },{
+        'isTrue' => false,
+        'name' => 'testname2',
+        }]
+    }
+    assert_equal [{"isTrue"=>true, "name"=>"testname1"}], JsonPath.new("$.data[?(@.isTrue)]").on(data)
+  end
+
   def test_regex
     assert_equal [], JsonPath.new('$..book[?(@.author =~ /herman/)]').on(@object)
     assert_equal [
