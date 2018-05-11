@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'phocus'
 require 'jsonpath'
+require 'json'
 
 class TestJsonpath < MiniTest::Unit::TestCase
   def setup
@@ -391,6 +392,64 @@ class TestJsonpath < MiniTest::Unit::TestCase
       @object['store']['book'][6],
     ], JsonPath.new('$..book[?(@.author =~ /herman|lukyanenko/i)]').on(@object)
     assert_equal ["asdf", "asdf2"], JsonPath.new("$.store.book..tags[?(@ =~ /asdf/)]").on(@object)
+  end
+
+  def test_regression_1
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general'
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random'
+        }
+      ]
+    }.to_json
+
+    assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.name == 'general')].id")[0]
+  end
+
+  def test_regression_2
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general',
+          is_archived: false
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random',
+          is_archived: true
+        }
+      ]
+    }.to_json
+
+    assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.is_archived == false)].id")[0]
+  end
+
+  def test_regression_3
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general',
+          is_archived: false
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random',
+          is_archived: true
+        }
+      ]
+    }.to_json
+
+    assert_equal 'C09C598QL', JsonPath.on(json, "$..channels[?(@.is_archived)].id")[0]
   end
 
   def example_object
