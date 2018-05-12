@@ -452,6 +452,46 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal 'C09C598QL', JsonPath.on(json, "$..channels[?(@.is_archived)].id")[0]
   end
 
+  def test_regression_4
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general',
+          is_archived: false
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random',
+          is_archived: true
+        }
+      ]
+    }.to_json
+
+    p JsonPath.on(json, "$..[?(@.is_archived)].id")
+  end
+
+  def test_regression_5
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general',
+          is_archived: 'false'
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random',
+          is_archived: true
+        }
+      ]
+    }.to_json
+
+    assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.is_archived == 'false')].id")[0]
+  end
+
   def example_object
     { 'store' => {
       'book' => [
