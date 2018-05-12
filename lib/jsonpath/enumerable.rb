@@ -111,8 +111,7 @@ class JsonPath
       return nil unless @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      unless identifiers.nil? ||
-             @_current_node.methods.include?(identifiers[2].to_sym)
+      unless identifiers.nil? || @_current_node.methods.include?(identifiers[2].to_sym)
         exp_to_eval = exp.dup
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
           el == '@' ? '@' : "['#{el}']"

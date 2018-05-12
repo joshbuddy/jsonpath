@@ -45,12 +45,15 @@ class JsonPath
           raise "Could not process symbol: #{t}"
         end
       end
+
       el = dig(elements, @_current_node)
-      return false unless el
+      return false if el.nil?
       return true if operator.nil? && el
 
       el = Float(el) rescue el
       operand = Float(operand) rescue operand
+      operand = false if operand == 'false' && el == false
+
       el.send(operator.strip, operand)
     end
 
