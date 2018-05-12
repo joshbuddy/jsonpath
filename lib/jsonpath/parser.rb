@@ -51,8 +51,8 @@ class JsonPath
       return true if operator.nil? && el
 
       el = Float(el) rescue el
-      operand = false?(operand) ? false : operand
       operand = Float(operand) rescue operand
+      operand = false if operand == 'false' && el == false
 
       el.send(operator.strip, operand)
     end
@@ -66,10 +66,6 @@ class JsonPath
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
       dig(keys, hash.fetch(prev))
-    end
-
-    def false?(obj)
-      obj.to_s == "false"
     end
   end
 end
