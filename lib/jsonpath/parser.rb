@@ -53,7 +53,6 @@ class JsonPath
       el = Float(el) rescue el
       operand = Float(operand) rescue operand
       operand = false if operand == 'false' && el == false
-
       el.send(operator.strip, operand)
     end
 

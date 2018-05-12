@@ -245,8 +245,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'id' => '123'
       }
     }
-    assert_equal [{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.data[?(@.type == 'users')]").on(data)
-    assert_equal [], JsonPath.new("$.data[?(@.type == 'admins')]").on(data)
+    assert_equal [{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.[?(@.type == 'users')]").on(data)
+    assert_equal [], JsonPath.new("$.[?(@.type == 'admins')]").on(data)
   end
 
   def test_support_at_sign_in_member_names
@@ -274,7 +274,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'type' => 'mps/awesome'
       }
     }
-    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.data[?(@.type == \"mps/awesome\")]").on(data)
+    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.[?(@.type == \"mps/awesome\")]").on(data)
   end
 
   def test_floating_point_with_precision_marker
@@ -283,7 +283,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'type' => 0.00001
       }
     }
-    assert_equal [{"type"=>0.00001}], JsonPath.new("$.data[?(@.type == 0.00001)]").on(data)
+    assert_equal [{"type"=>0.00001}], JsonPath.new("$.[?(@.type == 0.00001)]").on(data)
   end
 
   def test_digits_only_string
@@ -293,7 +293,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'id' => '123'
       }
     }
-    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
+    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.[?(@.id == '123')]").on(data))
   end
 
   def test_at_in_filter
@@ -366,7 +366,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'number' => '(492) 080-3961'
       }
     }
-    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
+    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.[?(@.number == '(492) 080-3961')]").on(data)
   end
 
 
@@ -450,6 +450,26 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }.to_json
 
     assert_equal 'C09C598QL', JsonPath.on(json, "$..channels[?(@.is_archived)].id")[0]
+  end
+
+  def test_regression_4
+    json = {
+      ok: true,
+      channels: [
+        {
+          id: 'C09C5GYHF',
+          name: 'general',
+          is_archived: false
+        },
+        {
+          id: 'C09C598QL',
+          name: 'random',
+          is_archived: true
+        }
+      ]
+    }.to_json
+
+    p JsonPath.on(json, "$..[?(@.name == 'general')].id")
   end
 
   def test_regression_5
