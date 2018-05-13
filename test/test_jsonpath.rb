@@ -270,11 +270,13 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_slash_in_value
     data = {
-      'data' => {
-        'type' => 'mps/awesome'
-      }
+      'data' => [{
+        'type' => 'mps/awesome',
+      },{
+        'type' => 'not',
+      }]
     }
-    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.[?(@.type == \"mps/awesome\")]").on(data)
+    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.data[?(@.type == \"mps/awesome\")]").on(data)
   end
 
   def test_floating_point_with_precision_marker
@@ -294,6 +296,19 @@ class TestJsonpath < MiniTest::Unit::TestCase
       }
     }
     assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.[?(@.id == '123')]").on(data))
+  end
+
+  def test_digits_only_string_in_array
+    data = {
+      'foo' => [{
+        'type' => 'users',
+        'id' => '123'
+      },{
+        'type' => 'users',
+        'id' => '321'
+      }]
+    }
+    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
   end
 
   def test_at_in_filter

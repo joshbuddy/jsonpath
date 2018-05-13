@@ -46,14 +46,17 @@ class JsonPath
         end
       end
 
-      el = dig(elements, @_current_node)
+      if elements.empty?
+        el = @_current_node
+      else
+        el = dig(elements, @_current_node)
+      end
       return false if el.nil?
       return true if operator.nil? && el
 
       el = Float(el) rescue el
       operand = Float(operand) rescue operand
       operand = false if operand == 'false' && el == false
-
       el.send(operator.strip, operand)
     end
 
@@ -61,7 +64,7 @@ class JsonPath
 
     # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3
     def dig(keys, hash)
-      return hash unless hash.is_a? Hash
+      return nil unless hash.is_a? Hash
       return nil unless hash.key?(keys.first)
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
