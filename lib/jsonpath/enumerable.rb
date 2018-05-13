@@ -36,13 +36,14 @@ class JsonPath
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
-          next unless node.is_a?(Hash)
-          k = sub_path[1, sub_path.size - 2]
-          each(node, k, pos + 1, &blk) if node.key?(k)
+          if node.is_a?(Hash)
+            k = sub_path[1, sub_path.size - 2]
+            each(node, k, pos + 1, &blk) if node.key?(k)
+          end
         when '?'
           handle_question_mark(sub_path, node, pos, &blk)
         else
-          next unless node.is_a?(Array) && !node.empty?
+          next if node.is_a?(Array) && node.empty?
           array_args = sub_path.split(':')
           if array_args[0] == '*'
             start_idx = 0
@@ -65,18 +66,12 @@ class JsonPath
 
     def handle_question_mark(sub_path, node, pos, &blk)
       case node
-      when Array
-        node.size.times do |index|
-          @_current_node = node[index]
-          # exps = sub_path[1, sub_path.size - 1]
-          # if @_current_node.send("[#{exps.gsub(/@/, '@_current_node')}]")
+      when Hash, Array
+        (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
+          @_current_node = node[e]
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
-        end
-      when Hash
-        if process_function_or_literal(sub_path[1, sub_path.size - 1])
-          each(@_current_node, nil, pos + 1, &blk)
         end
       else
         yield node if process_function_or_literal(sub_path[1, sub_path.size - 1])
@@ -111,7 +106,7 @@ class JsonPath
       return nil unless @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      unless identifiers.nil? || @_current_node.methods.include?(identifiers[2].to_sym)
+      if !identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)
         exp_to_eval = exp.dup
         exp_to_eval[identifiers[0]] = identifiers[0].split('.').map do |el|
           el == '@' ? '@' : "['#{el}']"
