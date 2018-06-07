@@ -545,6 +545,14 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.on(json, "$.initial[?(@)]")
   end
 
+  def test_hanging
+    json = { initial: true }.to_json
+    success_path = "$.initial"
+    assert_equal [true], JsonPath.on(json, success_path)
+    broken_path = "$.initial\n"
+    assert_equal [true], JsonPath.on(json, broken_path)
+  end
+
   def example_object
     { 'store' => {
       'book' => [
