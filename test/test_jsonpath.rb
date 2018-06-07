@@ -245,7 +245,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'id' => '123'
       }
     }
-    assert_equal [{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.[?(@.type == 'users')]").on(data)
+    assert_equal [{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.data[?(@.type == 'users')]").on(data)
     assert_equal [], JsonPath.new("$.[?(@.type == 'admins')]").on(data)
   end
 
@@ -285,7 +285,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'type' => 0.00001
       }
     }
-    assert_equal [{"type"=>0.00001}], JsonPath.new("$.[?(@.type == 0.00001)]").on(data)
+    assert_equal [{"type"=>0.00001}], JsonPath.new("$.data[?(@.type == 0.00001)]").on(data)
   end
 
   def test_digits_only_string
@@ -295,7 +295,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'id' => '123'
       }
     }
-    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.[?(@.id == '123')]").on(data))
+    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
   end
 
   def test_digits_only_string_in_array
@@ -381,7 +381,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'number' => '(492) 080-3961'
       }
     }
-    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.[?(@.number == '(492) 080-3961')]").on(data)
+    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
   end
 
 
@@ -484,7 +484,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       ]
     }.to_json
 
-    assert_equal ['C09C5GYHF'], JsonPath.on(json, "$..[?(@.name == 'general')].id")
+    assert_equal ['C09C5GYHF'], JsonPath.on(json, "$..channels[?(@.name == 'general')].id")
   end
 
   def test_regression_5
@@ -505,6 +505,44 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }.to_json
 
     assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.is_archived == 'false')].id")[0]
+  end
+
+  def test_changed
+    json =
+    {
+      "snapshot"=> {
+        "objects"=> {
+          "whatever"=> [
+            {
+              "column"=> {
+                "name"=> "ASSOCIATE_FLAG",
+                "nullable"=> true
+              }
+            },
+            {
+              "column"=> {
+                "name"=> "AUTHOR",
+                "nullable"=> false
+              }
+            }
+          ]
+        }
+      }
+    }
+    assert_equal true, JsonPath.on(json, "$..column[?(@.name == 'ASSOCIATE_FLAG')].nullable")[0]
+  end
+
+  def test_another
+    json = {
+      initial: true,
+      not: true
+    }.to_json
+    assert_equal [true], JsonPath.on(json, "$.initial[?(@)]")
+    json = {
+      initial: false,
+      not: true
+    }.to_json
+    assert_equal [], JsonPath.on(json, "$.initial[?(@)]")
   end
 
   def example_object

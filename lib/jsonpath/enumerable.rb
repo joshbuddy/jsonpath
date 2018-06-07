@@ -66,14 +66,20 @@ class JsonPath
 
     def handle_question_mark(sub_path, node, pos, &blk)
       case node
-      when Hash, Array
-        (node.is_a?(Hash) ? node.keys : (0..node.size)).each do |e|
-          @_current_node = node[e]
+        when Array
+          node.size.times do |index|
+            @_current_node = node[index]
+            # exps = sub_path[1, sub_path.size - 1]
+            # if @_current_node.send("[#{exps.gsub(/@/, '@_current_node')}]")
+              if process_function_or_literal(sub_path[1, sub_path.size - 1])
+                each(@_current_node, nil, pos + 1, &blk)
+              end
+            end
+        when Hash
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
-        end
-      else
+          else
         yield node if process_function_or_literal(sub_path[1, sub_path.size - 1])
       end
     end
