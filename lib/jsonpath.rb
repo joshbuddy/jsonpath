@@ -14,7 +14,7 @@ class JsonPath
 
   def initialize(path, opts = nil)
     @opts = opts
-    scanner = StringScanner.new(path)
+    scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
       if token = scanner.scan(/\$\B|@\B|\*|\.\./)
