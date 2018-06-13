@@ -38,7 +38,15 @@ class JsonPath
         elsif t = scanner.scan(/(\s+)?[<>=][=~]?(\s+)?/)
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
-          operand = operator.strip == "=~" ? t.to_regexp : t.delete("'").strip
+          # If we encounter a node which does not contain `'` it means
+          # that we are dealing with a boolean type.
+          if t == "true"
+            operand = true
+          elsif t == "false"
+            operand = false
+          else
+            operand = operator.strip == "=~" ? t.to_regexp : t.delete("'").strip
+          end
         elsif t = scanner.scan(/\/\w+\//)
         elsif t = scanner.scan(/.*/)
           raise "Could not process symbol: #{t}"
@@ -55,8 +63,6 @@ class JsonPath
 
       el = Float(el) rescue el
       operand = Float(operand) rescue operand
-      operand = false if operand == 'false' && el == false
-      operand = true if operand == 'true' && el == true
 
       el.__send__(operator.strip, operand)
     end
