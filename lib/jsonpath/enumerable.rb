@@ -2,7 +2,7 @@ class JsonPath
   class Enumerable
     include ::Enumerable
 
-    def initialize(path, object, mode, options = nil)
+    def initialize(path, object, mode, options = {})
       @path = path.path
       @object = object
       @mode = mode
@@ -38,6 +38,7 @@ class JsonPath
         when '\'', '"'
           if node.is_a?(Hash)
             k = sub_path[1, sub_path.size - 2]
+            node[k] ||= nil if @options[:default_path_leaf_to_null]
             each(node, k, pos + 1, &blk) if node.key?(k)
           end
         when '?'

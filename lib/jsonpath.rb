@@ -12,7 +12,7 @@ class JsonPath
 
   attr_accessor :path
 
-  def initialize(path, opts = nil)
+  def initialize(path, opts = {})
     @opts = opts
     scanner = StringScanner.new(path.strip)
     @path = []
@@ -75,7 +75,7 @@ class JsonPath
   end
   alias_method :[], :enum_on
 
-  def self.on(obj_or_str, path, opts = nil)
+  def self.on(obj_or_str, path, opts = {})
     new(path, opts).on(process_object(obj_or_str))
   end
 
