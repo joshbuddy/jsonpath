@@ -537,7 +537,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       initial: true,
       not: true
     }.to_json
-    assert_equal [true], JsonPath.on(json, "$.initial[?(@)]")
+    assert_equal [{"initial"=>true, "not"=>true}], JsonPath.on(json, "$.[?(@.initial == true)]")
     json = {
       initial: false,
       not: true
