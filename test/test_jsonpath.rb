@@ -537,12 +537,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
       initial: true,
       not: true
     }.to_json
-    assert_equal [true], JsonPath.on(json, "$.initial[?(@)]")
+    assert_equal [{"initial"=>true, "not"=>true}], JsonPath.on(json, "$.[?(@.initial == true)]")
     json = {
       initial: false,
       not: true
     }.to_json
     assert_equal [], JsonPath.on(json, "$.initial[?(@)]")
+    assert_equal [], JsonPath.on(json, "$.[?(@.initial == true)]")
+    assert_equal [{"initial"=>false, "not"=>true}], JsonPath.on(json, "$.[?(@.initial == false)]")
+    json = {
+      initial: 'false',
+      not: true
+    }.to_json
+    assert_equal [{"initial"=>"false", "not"=>true}], JsonPath.on(json, "$.[?(@.initial == 'false')]")
+    assert_equal [], JsonPath.on(json, "$.[?(@.initial == false)]")
   end
 
   def test_hanging
