@@ -60,7 +60,11 @@ class JsonPath
           end_idx %= node.size
           step = process_function_or_literal(array_args[2], 1)
           next unless step
-          (start_idx..end_idx).step(step) { |i| each(node, i, pos + 1, &blk) }
+          if @mode == :delete
+            (start_idx..end_idx).step(step).reverse_each { |i| each(node, i, pos + 1, &blk) }
+          else
+            (start_idx..end_idx).step(step) { |i| each(node, i, pos + 1, &blk) }
+          end
         end
       end
     end
