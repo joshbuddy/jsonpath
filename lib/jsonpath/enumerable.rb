@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JsonPath
   class Enumerable
     include ::Enumerable
@@ -32,7 +34,7 @@ class JsonPath
 
     private
 
-    def handle_wildecard(node, expr, context, key, pos, &blk)
+    def handle_wildecard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
@@ -91,7 +93,13 @@ class JsonPath
     end
 
     def yield_value(blk, context, key)
-      key = Integer(key) rescue key if key
+      if key
+        key = begin
+                Integer(key)
+              rescue StandardError
+                key
+              end
+      end
       case @mode
       when nil
         blk.call(key ? context[key] : context)

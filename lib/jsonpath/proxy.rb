@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JsonPath
   class Proxy
     attr_reader :obj

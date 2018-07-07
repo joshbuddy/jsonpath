@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'strscan'
 require 'to_regexp'
 
@@ -23,7 +25,7 @@ class JsonPath
     end
 
     def parse_exp(exp)
-      exp = exp.sub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').gsub(/"/, '\'').strip
+      exp = exp.sub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').tr('"', '\'').strip
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
@@ -39,30 +41,38 @@ class JsonPath
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           # If we encounter a node which does not contain `'` it means
-          # that we are dealing with a boolean type.
-          if t == "true"
-            operand = true
-          elsif t == "false"
-            operand = false
-          else
-            operand = operator.strip == "=~" ? t.to_regexp : t.delete("'").strip
-          end
+          #  that we are dealing with a boolean type.
+          operand = if t == 'true'
+                      true
+                    elsif t == 'false'
+                      false
+                    else
+                      operator.strip == '=~' ? t.to_regexp : t.delete("'").strip
+                    end
         elsif t = scanner.scan(/\/\w+\//)
         elsif t = scanner.scan(/.*/)
           raise "Could not process symbol: #{t}"
         end
       end
 
-      if elements.empty?
-        el = @_current_node
-      else
-        el = dig(elements, @_current_node)
-      end
+      el = if elements.empty?
+             @_current_node
+           else
+             dig(elements, @_current_node)
+           end
       return false if el.nil?
       return true if operator.nil? && el
 
-      el = Float(el) rescue el
-      operand = Float(operand) rescue operand
+      el = begin
+             Float(el)
+           rescue StandardError
+             el
+           end
+      operand = begin
+                  Float(operand)
+                rescue StandardError
+                  operand
+                end
 
       el.__send__(operator.strip, operand)
     end

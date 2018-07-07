@@ -1,12 +1,14 @@
-# -*- encoding: utf-8 -*-
+# frozen_string_literal: true
 
 require File.join(File.dirname(__FILE__), 'lib', 'jsonpath', 'version')
 
 Gem::Specification.new do |s|
   s.name = 'jsonpath'
   s.version = JsonPath::VERSION
-  s.required_rubygems_version =
-    Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
+  if s.respond_to? :required_rubygems_version=
+    s.required_rubygems_version =
+      Gem::Requirement.new('>= 0')
+  end
   s.authors = ['Joshua Hull', 'Gergely Brautigam']
   s.summary = 'Ruby implementation of http://goessner.net/articles/JsonPath/'
   s.description = 'Ruby implementation of http://goessner.net/articles/JsonPath/.'
@@ -25,10 +27,9 @@ Gem::Specification.new do |s|
   # dependencies
   s.add_runtime_dependency 'multi_json'
   s.add_runtime_dependency 'to_regexp', '~> 0.2.1'
+  s.add_development_dependency 'bundler'
   s.add_development_dependency 'code_stats'
-  s.add_development_dependency 'rake'
   s.add_development_dependency 'minitest', '~> 2.2.0'
   s.add_development_dependency 'phocus'
-  s.add_development_dependency 'bundler'
+  s.add_development_dependency 'rake'
 end
-

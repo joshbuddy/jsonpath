@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'phocus'
 require 'jsonpath'
@@ -250,17 +252,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_support_at_sign_in_member_names
-    assert_equal [@object['store']['@id']], JsonPath.new("$.store.@id").on(@object)
+    assert_equal [@object['store']['@id']], JsonPath.new('$.store.@id').on(@object)
   end
 
   def test_support_dollar_sign_in_member_names
     assert_equal [@object['store']['$meta-data']],
-      JsonPath.new("$.store.$meta-data").on(@object)
+                 JsonPath.new('$.store.$meta-data').on(@object)
   end
 
   def test_support_underscore_in_member_names
     assert_equal [@object['store']['_links']],
-      JsonPath.new("$.store._links").on(@object)
+                 JsonPath.new('$.store._links').on(@object)
   end
 
   def test_dig_return_string
@@ -271,12 +273,12 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_slash_in_value
     data = {
       'data' => [{
-        'type' => 'mps/awesome',
-      },{
-        'type' => 'not',
+        'type' => 'mps/awesome'
+      }, {
+        'type' => 'not'
       }]
     }
-    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new("$.data[?(@.type == \"mps/awesome\")]").on(data)
+    assert_equal [{ 'type' => 'mps/awesome' }], JsonPath.new('$.data[?(@.type == "mps/awesome")]').on(data)
   end
 
   def test_floating_point_with_precision_marker
@@ -285,7 +287,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'type' => 0.00001
       }
     }
-    assert_equal [{"type"=>0.00001}], JsonPath.new("$.data[?(@.type == 0.00001)]").on(data)
+    assert_equal [{ 'type' => 0.00001 }], JsonPath.new('$.data[?(@.type == 0.00001)]').on(data)
   end
 
   def test_digits_only_string
@@ -295,7 +297,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'id' => '123'
       }
     }
-    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
+    assert_equal([{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
   end
 
   def test_digits_only_string_in_array
@@ -303,55 +305,55 @@ class TestJsonpath < MiniTest::Unit::TestCase
       'foo' => [{
         'type' => 'users',
         'id' => '123'
-      },{
+      }, {
         'type' => 'users',
         'id' => '321'
       }]
     }
-    assert_equal([{"type"=>"users", "id"=>"123"}], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
+    assert_equal([{ 'type' => 'users', 'id' => '123' }], JsonPath.new("$.foo[?(@.id == '123')]").on(data))
   end
 
   def test_at_in_filter
     jsonld = {
-      "mentions" => [
-         {
-            "name" => "Delimara Powerplant",
-            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
-            "@type" => "Place",
-            "geo" => {
-               "latitude" => 35.83020073454,
-               "longitude" => 14.55602645874
-            }
-         }
+      'mentions' => [
+        {
+          'name' => 'Delimara Powerplant',
+          'identifier' => 'krzana://took/powerstation/Delimara Powerplant',
+          '@type' => 'Place',
+          'geo' => {
+            'latitude' => 35.83020073454,
+            'longitude' => 14.55602645874
+          }
+        }
       ]
-   }
-   assert_equal(['Place'], JsonPath.new("$..mentions[?(@['@type'] == 'Place')].@type").on(jsonld))
+    }
+    assert_equal(['Place'], JsonPath.new("$..mentions[?(@['@type'] == 'Place')].@type").on(jsonld))
   end
 
   def test_dollar_in_filter
     jsonld = {
-      "mentions" => [
-         {
-            "name" => "Delimara Powerplant",
-            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
-            "$type" => "Place",
-            "geo" => {
-               "latitude" => 35.83020073454,
-               "longitude" => 14.55602645874
-            }
-         }
+      'mentions' => [
+        {
+          'name' => 'Delimara Powerplant',
+          'identifier' => 'krzana://took/powerstation/Delimara Powerplant',
+          '$type' => 'Place',
+          'geo' => {
+            'latitude' => 35.83020073454,
+            'longitude' => 14.55602645874
+          }
+        }
       ]
-   }
-   assert_equal(['Place'], JsonPath.new("$..mentions[?(@['$type'] == 'Place')].$type").on(jsonld))
+    }
+    assert_equal(['Place'], JsonPath.new("$..mentions[?(@['$type'] == 'Place')].$type").on(jsonld))
   end
 
   def test_underscore_in_filter
     jsonld = {
-      "attributes" => [
+      'attributes' => [
         {
-          "store" => [
-             { "with" => "urn" },
-             { "with_underscore" => "urn:1" }
+          'store' => [
+            { 'with' => 'urn' },
+            { 'with_underscore' => 'urn:1' }
           ]
         }
       ]
@@ -361,18 +363,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_at_in_value
     jsonld = {
-      "mentions" =>
+      'mentions' =>
          {
-            "name" => "Delimara Powerplant",
-            "identifier" => "krzana://took/powerstation/Delimara Powerplant",
-            "type" => "@Place",
-            "geo" => {
-               "latitude" => 35.83020073454,
-               "longitude" => 14.55602645874
-            }
+           'name' => 'Delimara Powerplant',
+           'identifier' => 'krzana://took/powerstation/Delimara Powerplant',
+           'type' => '@Place',
+           'geo' => {
+             'latitude' => 35.83020073454,
+             'longitude' => 14.55602645874
+           }
          }
-   }
-   assert_equal(['@Place'], JsonPath.new("$..mentions.type[?(@ == '@Place')]").on(jsonld))
+    }
+    assert_equal(['@Place'], JsonPath.new("$..mentions.type[?(@ == '@Place')]").on(jsonld))
   end
 
   def test_parens_in_value
@@ -381,21 +383,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'number' => '(492) 080-3961'
       }
     }
-    assert_equal [{'number'=>'(492) 080-3961'}], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
+    assert_equal [{ 'number' => '(492) 080-3961' }], JsonPath.new("$.data[?(@.number == '(492) 080-3961')]").on(data)
   end
-
 
   def test_boolean_parameter_value
     data = {
       'data' => [{
         'isTrue' => true,
-        'name' => 'testname1',
-      },{
+        'name' => 'testname1'
+      }, {
         'isTrue' => false,
-        'name' => 'testname2',
-        }]
+        'name' => 'testname2'
+      }]
     }
-    assert_equal [{"isTrue"=>true, "name"=>"testname1"}], JsonPath.new("$.data[?(@.isTrue)]").on(data)
+    assert_equal [{ 'isTrue' => true, 'name' => 'testname1' }], JsonPath.new('$.data[?(@.isTrue)]').on(data)
   end
 
   def test_regex
@@ -404,9 +405,9 @@ class TestJsonpath < MiniTest::Unit::TestCase
       @object['store']['book'][2],
       @object['store']['book'][4],
       @object['store']['book'][5],
-      @object['store']['book'][6],
+      @object['store']['book'][6]
     ], JsonPath.new('$..book[?(@.author =~ /herman|lukyanenko/i)]').on(@object)
-    assert_equal ["asdf", "asdf2"], JsonPath.new("$.store.book..tags[?(@ =~ /asdf/)]").on(@object)
+    assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ /asdf/)]').on(@object)
   end
 
   def test_regression_1
@@ -444,7 +445,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       ]
     }.to_json
 
-    assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.is_archived == false)].id")[0]
+    assert_equal 'C09C5GYHF', JsonPath.on(json, '$..channels[?(@.is_archived == false)].id')[0]
   end
 
   def test_regression_3
@@ -464,7 +465,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       ]
     }.to_json
 
-    assert_equal 'C09C598QL', JsonPath.on(json, "$..channels[?(@.is_archived)].id")[0]
+    assert_equal 'C09C598QL', JsonPath.on(json, '$..channels[?(@.is_archived)].id')[0]
   end
 
   def test_regression_4
@@ -509,26 +510,26 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_changed
     json =
-    {
-      "snapshot"=> {
-        "objects"=> {
-          "whatever"=> [
-            {
-              "column"=> {
-                "name"=> "ASSOCIATE_FLAG",
-                "nullable"=> true
+      {
+        'snapshot' => {
+          'objects' => {
+            'whatever' => [
+              {
+                'column' => {
+                  'name' => 'ASSOCIATE_FLAG',
+                  'nullable' => true
+                }
+              },
+              {
+                'column' => {
+                  'name' => 'AUTHOR',
+                  'nullable' => false
+                }
               }
-            },
-            {
-              "column"=> {
-                "name"=> "AUTHOR",
-                "nullable"=> false
-              }
-            }
-          ]
+            ]
+          }
         }
       }
-    }
     assert_equal true, JsonPath.on(json, "$..column[?(@.name == 'ASSOCIATE_FLAG')].nullable")[0]
   end
 
@@ -537,72 +538,72 @@ class TestJsonpath < MiniTest::Unit::TestCase
       initial: true,
       not: true
     }.to_json
-    assert_equal [{"initial"=>true, "not"=>true}], JsonPath.on(json, "$.[?(@.initial == true)]")
+    assert_equal [{ 'initial' => true, 'not' => true }], JsonPath.on(json, '$.[?(@.initial == true)]')
     json = {
       initial: false,
       not: true
     }.to_json
-    assert_equal [], JsonPath.on(json, "$.initial[?(@)]")
-    assert_equal [], JsonPath.on(json, "$.[?(@.initial == true)]")
-    assert_equal [{"initial"=>false, "not"=>true}], JsonPath.on(json, "$.[?(@.initial == false)]")
+    assert_equal [], JsonPath.on(json, '$.initial[?(@)]')
+    assert_equal [], JsonPath.on(json, '$.[?(@.initial == true)]')
+    assert_equal [{ 'initial' => false, 'not' => true }], JsonPath.on(json, '$.[?(@.initial == false)]')
     json = {
       initial: 'false',
       not: true
     }.to_json
-    assert_equal [{"initial"=>"false", "not"=>true}], JsonPath.on(json, "$.[?(@.initial == 'false')]")
-    assert_equal [], JsonPath.on(json, "$.[?(@.initial == false)]")
+    assert_equal [{ 'initial' => 'false', 'not' => true }], JsonPath.on(json, "$.[?(@.initial == 'false')]")
+    assert_equal [], JsonPath.on(json, '$.[?(@.initial == false)]')
   end
 
   def test_hanging
     json = { initial: true }.to_json
-    success_path = "$.initial"
+    success_path = '$.initial'
     assert_equal [true], JsonPath.on(json, success_path)
     broken_path = "$.initial\n"
     assert_equal [true], JsonPath.on(json, broken_path)
   end
 
   def test_delete_more_items
-    a = {"itemList"=>
-      [{"alfa"=>"beta1"},
-       {"alfa"=>"beta2"},
-       {"alfa"=>"beta3"},
-       {"alfa"=>"beta4"},
-       {"alfa"=>"beta5"},
-       {"alfa"=>"beta6"},
-       {"alfa"=>"beta7"},
-       {"alfa"=>"beta8"},
-       {"alfa"=>"beta9"},
-       {"alfa"=>"beta10"},
-       {"alfa"=>"beta11"},
-       {"alfa"=>"beta12"}]}
-    expected = {"itemList"=>[{"alfa"=>"beta1"}]}
+    a = { 'itemList' =>
+      [{ 'alfa' => 'beta1' },
+       { 'alfa' => 'beta2' },
+       { 'alfa' => 'beta3' },
+       { 'alfa' => 'beta4' },
+       { 'alfa' => 'beta5' },
+       { 'alfa' => 'beta6' },
+       { 'alfa' => 'beta7' },
+       { 'alfa' => 'beta8' },
+       { 'alfa' => 'beta9' },
+       { 'alfa' => 'beta10' },
+       { 'alfa' => 'beta11' },
+       { 'alfa' => 'beta12' }] }
+    expected = { 'itemList' => [{ 'alfa' => 'beta1' }] }
     assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:11:1]').to_hash
   end
 
   def test_delete_more_items_with_stepping
-    a = {"itemList"=>
-      [{"alfa"=>"beta1"},
-       {"alfa"=>"beta2"},
-       {"alfa"=>"beta3"},
-       {"alfa"=>"beta4"},
-       {"alfa"=>"beta5"},
-       {"alfa"=>"beta6"},
-       {"alfa"=>"beta7"},
-       {"alfa"=>"beta8"},
-       {"alfa"=>"beta9"},
-       {"alfa"=>"beta10"},
-       {"alfa"=>"beta11"},
-       {"alfa"=>"beta12"}]}
-    expected = {"itemList"=>
-    [{"alfa"=>"beta1"},
-      {"alfa"=>"beta3"},
-      {"alfa"=>"beta5"},
-      {"alfa"=>"beta7"},
-      {"alfa"=>"beta8"},
-      {"alfa"=>"beta9"},
-      {"alfa"=>"beta10"},
-      {"alfa"=>"beta11"},
-      {"alfa"=>"beta12"}]}
+    a = { 'itemList' =>
+      [{ 'alfa' => 'beta1' },
+       { 'alfa' => 'beta2' },
+       { 'alfa' => 'beta3' },
+       { 'alfa' => 'beta4' },
+       { 'alfa' => 'beta5' },
+       { 'alfa' => 'beta6' },
+       { 'alfa' => 'beta7' },
+       { 'alfa' => 'beta8' },
+       { 'alfa' => 'beta9' },
+       { 'alfa' => 'beta10' },
+       { 'alfa' => 'beta11' },
+       { 'alfa' => 'beta12' }] }
+    expected = { 'itemList' =>
+    [{ 'alfa' => 'beta1' },
+     { 'alfa' => 'beta3' },
+     { 'alfa' => 'beta5' },
+     { 'alfa' => 'beta7' },
+     { 'alfa' => 'beta8' },
+     { 'alfa' => 'beta9' },
+     { 'alfa' => 'beta10' },
+     { 'alfa' => 'beta11' },
+     { 'alfa' => 'beta12' }] }
     assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:6:2]').to_hash
   end
 
@@ -613,7 +614,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
           'author' => 'Nigel Rees',
           'title' => 'Sayings of the Century',
           'price' => 9,
-          'tags' => ['asdf', 'asdf2']},
+          'tags' => %w[asdf asdf2] },
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',
@@ -655,9 +656,9 @@ class TestJsonpath < MiniTest::Unit::TestCase
         '2seater' => 'yes',
         'make:model' => 'Zippy Sweetwheeler'
       },
-      "@id" => "http://example.org/store/42",
-      "$meta-data" => "whatevs",
-      "_links" => { "self" => {} }
+      '@id' => 'http://example.org/store/42',
+      '$meta-data' => 'whatevs',
+      '_links' => { 'self' => {} }
     } }
   end
 end
