@@ -561,6 +561,51 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [true], JsonPath.on(json, broken_path)
   end
 
+  def test_delete_more_items
+    a = {"itemList"=>
+      [{"alfa"=>"beta1"},
+       {"alfa"=>"beta2"},
+       {"alfa"=>"beta3"},
+       {"alfa"=>"beta4"},
+       {"alfa"=>"beta5"},
+       {"alfa"=>"beta6"},
+       {"alfa"=>"beta7"},
+       {"alfa"=>"beta8"},
+       {"alfa"=>"beta9"},
+       {"alfa"=>"beta10"},
+       {"alfa"=>"beta11"},
+       {"alfa"=>"beta12"}]}
+    expected = {"itemList"=>[{"alfa"=>"beta1"}]}
+    assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:11:1]').to_hash
+  end
+
+  def test_delete_more_items_with_stepping
+    a = {"itemList"=>
+      [{"alfa"=>"beta1"},
+       {"alfa"=>"beta2"},
+       {"alfa"=>"beta3"},
+       {"alfa"=>"beta4"},
+       {"alfa"=>"beta5"},
+       {"alfa"=>"beta6"},
+       {"alfa"=>"beta7"},
+       {"alfa"=>"beta8"},
+       {"alfa"=>"beta9"},
+       {"alfa"=>"beta10"},
+       {"alfa"=>"beta11"},
+       {"alfa"=>"beta12"}]}
+    expected = {"itemList"=>
+    [{"alfa"=>"beta1"},
+      {"alfa"=>"beta3"},
+      {"alfa"=>"beta5"},
+      {"alfa"=>"beta7"},
+      {"alfa"=>"beta8"},
+      {"alfa"=>"beta9"},
+      {"alfa"=>"beta10"},
+      {"alfa"=>"beta11"},
+      {"alfa"=>"beta12"}]}
+    assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:6:2]').to_hash
+  end
+
   def example_object
     { 'store' => {
       'book' => [
