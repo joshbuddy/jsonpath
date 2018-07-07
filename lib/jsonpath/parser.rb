@@ -63,16 +63,8 @@ class JsonPath
       return false if el.nil?
       return true if operator.nil? && el
 
-      el = begin
-             Float(el)
-           rescue StandardError
-             el
-           end
-      operand = begin
-                  Float(operand)
-                rescue StandardError
-                  operand
-                end
+      el = Float(el) rescue el
+      operand = Float(operand) rescue operand
 
       el.__send__(operator.strip, operand)
     end
