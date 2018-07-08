@@ -1,3 +1,6 @@
-source "http://rubygems.org"
+# frozen_string_literal: true
+
+source 'http://rubygems.org'
 gemspec
-gem 'simplecov', :require => false, :group => :test
+gem 'rubocop', require: true, group: :test
+gem 'simplecov', require: false, group: :test

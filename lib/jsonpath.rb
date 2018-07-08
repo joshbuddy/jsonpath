@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'strscan'
 require 'multi_json'
 require 'jsonpath/proxy'
@@ -8,7 +10,7 @@ require 'jsonpath/parser'
 # JsonPath: initializes the class with a given JsonPath and parses that path
 # into a token array.
 class JsonPath
-  PATH_ALL = '$..*'.freeze
+  PATH_ALL = '$..*'
 
   attr_accessor :path
 
@@ -73,7 +75,7 @@ class JsonPath
     JsonPath::Enumerable.new(self, self.class.process_object(obj_or_str), mode,
                              @opts)
   end
-  alias_method :[], :enum_on
+  alias [] enum_on
 
   def self.on(obj_or_str, path, opts = {})
     new(path, opts).on(process_object(obj_or_str))
