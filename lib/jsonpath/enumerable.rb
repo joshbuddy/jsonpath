@@ -77,13 +77,21 @@ class JsonPath
       when Array
         node.size.times do |index|
           @_current_node = node[index]
-          # exps = sub_path[1, sub_path.size - 1]
           # if @_current_node.send("[#{exps.gsub(/@/, '@_current_node')}]")
+          exps = sub_path[1, sub_path.size - 1]
+          if exps.match(%r{\/.*\/\.match()})
+            puts "parse regex here"
+          end
+
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
         end
       when Hash
+        exps = sub_path[1, sub_path.size - 1]
+        if exps.match(%r{\/.*\/\.})
+          puts "parse regex here"
+        end
         if process_function_or_literal(sub_path[1, sub_path.size - 1])
           each(@_current_node, nil, pos + 1, &blk)
         end
@@ -104,6 +112,8 @@ class JsonPath
       when :delete
         if key
           key.is_a?(Integer) ? context.delete_at(key) : context.delete(key)
+        else
+          context.replace({})
         end
       when :substitute
         if key

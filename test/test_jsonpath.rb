@@ -173,6 +173,85 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal({ 'you' => nil }, h)
   end
 
+  def test_delete_2
+    json = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2] },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    json_deleted = { 'store' => {
+      'book' => [
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    assert_equal(json_deleted, JsonPath.for(json).delete("$..store.book[?(@.category == 'reference')]").obj)
+  end
+
+  def test_delete_3
+    json = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2],
+          'this' => {
+            'delete_me' => [
+              'no' => 'do not',
+            ],
+          },
+        },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    json_deleted = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2],
+          'this' => {},
+        },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    assert_equal(json_deleted, JsonPath.for(json).delete("$..store.book..delete_me").obj)
+  end
+
   def test_delete_for_array
     before = JsonPath.on(@object, '$..store.book[1]')
     JsonPath.for(@object).delete!('$..store.book[0]')
@@ -606,6 +685,84 @@ class TestJsonpath < MiniTest::Unit::TestCase
      { 'alfa' => 'beta12' }] }
     assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:6:2]').to_hash
   end
+
+  def test_weird_path
+    json = '
+    {
+      "ports": {
+        "extraports": {
+          "count": "996",
+          "state": "filtered",
+          "extrareasons": {
+            "count": "996",
+            "reason": "no-responses"
+          }
+        },
+        "port": [
+          {
+            "portid": "80",
+            "protocol": "tcp",
+            "service": {
+              "conf": "3",
+              "method": "table",
+              "name": "http"
+            },
+            "state": {
+              "reason": "syn-ack",
+              "reason_ttl": "44",
+              "state": "open"
+            }
+          },
+          {
+            "portid": "443",
+            "protocol": "tcp",
+            "service": {
+              "conf": "3",
+              "method": "table",
+              "name": "https"
+            },
+            "state": {
+              "reason": "syn-ack",
+              "reason_ttl": "44",
+              "state": "open"
+            }
+          },
+          {
+            "portid": "2222",
+            "protocol": "tcp",
+            "service": {
+              "conf": "3",
+              "method": "table",
+              "name": "EtherNetIP-1"
+            },
+            "state": {
+              "reason": "syn-ack",
+              "reason_ttl": "45",
+              "state": "open"
+            }
+          },
+          {
+            "portid": "3128",
+            "protocol": "tcp",
+            "service": {
+              "conf": "3",
+              "method": "table",
+              "name": "squid-http"
+            },
+            "state": {
+              "reason": "syn-ack",
+              "reason_ttl": "44",
+              "state": "open"
+            }
+          }
+        ]
+      }
+    }'.to_json
+
+    p JsonPath.on(json, '$..[?(/http/.match(@.name))]')
+  end
+
+
 
   def example_object
     { 'store' => {
