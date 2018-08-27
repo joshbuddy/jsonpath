@@ -46,7 +46,17 @@ class JsonPath
 
     def _delete(obj, path)
       JsonPath.new(path)[obj, :delete].each
+      obj = _remove(obj)
       Proxy.new(obj)
+    end
+
+    def _remove(obj)
+      obj.each do |o|
+        if o.is_a?(Hash) || o.is_a?(Array)
+          _remove(o)
+          o.delete({})
+        end
+      end
     end
 
     def _compact(obj, path)

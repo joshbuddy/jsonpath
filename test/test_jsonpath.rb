@@ -173,6 +173,89 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal({ 'you' => nil }, h)
   end
 
+  def test_delete_2
+    json = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2] },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    json_deleted = { 'store' => {
+      'book' => [
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13 },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1 }
+      ]
+    } }
+    assert_equal(json_deleted, JsonPath.for(json).delete("$..store.book[?(@.category == 'reference')]").obj)
+  end
+
+  def test_delete_3
+    json = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2],
+          'this' => {
+            'delete_me' => [
+              'no' => 'do not'
+            ]
+          }
+        },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13
+        },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1
+        }
+      ]
+    } }
+    json_deleted = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'tags' => %w[asdf asdf2],
+          'this' => {}
+        },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13
+        },
+        { 'category' => 'fiction',
+          'author' => 'Aasdf',
+          'title' => 'Aaasdf2',
+          'price' => 1
+        }
+      ]
+    } }
+    assert_equal(json_deleted, JsonPath.for(json).delete('$..store.book..delete_me').obj)
+  end
+
   def test_delete_for_array
     before = JsonPath.on(@object, '$..store.book[1]')
     JsonPath.for(@object).delete!('$..store.book[0]')
