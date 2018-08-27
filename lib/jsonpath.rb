@@ -10,7 +10,7 @@ require 'jsonpath/parser'
 # JsonPath: initializes the class with a given JsonPath and parses that path
 # into a token array.
 class JsonPath
-  PATH_ALL = '$..*'
+  PATH_ALL = '$..*'.freeze
 
   attr_accessor :path
 

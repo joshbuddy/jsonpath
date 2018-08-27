@@ -54,7 +54,7 @@ class JsonPath
       obj.each do |o|
         if o.is_a?(Hash) || o.is_a?(Array)
           _remove(o)
-          o = o.delete({})
+          o.delete({})
         end
       end
     end

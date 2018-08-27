@@ -216,18 +216,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
           'tags' => %w[asdf asdf2],
           'this' => {
             'delete_me' => [
-              'no' => 'do not',
-            ],
-          },
+              'no' => 'do not'
+            ]
+          }
         },
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',
-          'price' => 13 },
+          'price' => 13
+        },
         { 'category' => 'fiction',
           'author' => 'Aasdf',
           'title' => 'Aaasdf2',
-          'price' => 1 }
+          'price' => 1
+        }
       ]
     } }
     json_deleted = { 'store' => {
@@ -237,19 +239,21 @@ class TestJsonpath < MiniTest::Unit::TestCase
           'title' => 'Sayings of the Century',
           'price' => 9,
           'tags' => %w[asdf asdf2],
-          'this' => {},
+          'this' => {}
         },
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',
-          'price' => 13 },
+          'price' => 13
+        },
         { 'category' => 'fiction',
           'author' => 'Aasdf',
           'title' => 'Aaasdf2',
-          'price' => 1 }
+          'price' => 1
+        }
       ]
     } }
-    assert_equal(json_deleted, JsonPath.for(json).delete("$..store.book..delete_me").obj)
+    assert_equal(json_deleted, JsonPath.for(json).delete('$..store.book..delete_me').obj)
   end
 
   def test_delete_for_array
