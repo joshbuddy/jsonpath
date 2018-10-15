@@ -591,6 +591,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal 'C09C5GYHF', JsonPath.on(json, "$..channels[?(@.is_archived == 'false')].id")[0]
   end
 
+  def test_quote
+    json = {
+      channels: [
+        {
+          name: "King's Speech",
+        }
+      ]
+    }.to_json
+
+    assert_equal [{"name" => "King\'s Speech"}], JsonPath.on(json, "$..channels[?(@.name == 'King\'s Speech')]")
+  end
+
   def test_changed
     json =
       {
