@@ -603,6 +603,13 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{"name" => "King\'s Speech"}], JsonPath.on(json, "$..channels[?(@.name == 'King\'s Speech')]")
   end
 
+  def test_curly_brackets
+    data = {
+      '{data}' => 'data'
+    }
+    assert_equal ['data'], JsonPath.new("$.{data}").on(data)
+  end
+
   def test_changed
     json =
       {
