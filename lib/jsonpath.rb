@@ -21,7 +21,7 @@ class JsonPath
     until scanner.eos?
       if token = scanner.scan(/\$\B|@\B|\*|\.\./)
         @path << token
-      elsif token = scanner.scan(/[\$@a-zA-Z0-9:_-]+/)
+      elsif token = scanner.scan(/[\$@a-zA-Z0-9:{}_-]+/)
         @path << "['#{token}']"
       elsif token = scanner.scan(/'(.*?)'/)
         @path << "[#{token}]"
@@ -33,6 +33,8 @@ class JsonPath
         nil
       elsif token = scanner.scan(/[><=] \d+/)
         @path.last << token
+      # TODO: If there are characters that it can't match in the previous legs, this will throw
+      # a RuntimeError: can't modify frozen String error.
       elsif token = scanner.scan(/./)
         @path.last << token
       end
