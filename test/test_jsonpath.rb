@@ -610,6 +610,49 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['data'], JsonPath.new("$.{data}").on(data)
   end
 
+  def test_symbolize
+    data = '
+    {
+      "store": {
+        "bicycle": {
+          "price": 19.95,
+          "color": "red"
+        },
+        "book": [
+          {
+            "price": 8.95,
+            "category": "reference",
+            "title": "Sayings of the Century",
+            "author": "Nigel Rees"
+          },
+          {
+            "price": 12.99,
+            "category": "fiction",
+            "title": "Sword of Honour",
+            "author": "Evelyn Waugh"
+          },
+          {
+            "price": 8.99,
+            "category": "fiction",
+            "isbn": "0-553-21311-3",
+            "title": "Moby Dick",
+            "author": "Herman Melville",
+            "color": "blue"
+          },
+          {
+            "price": 22.99,
+            "category": "fiction",
+            "isbn": "0-395-19395-8",
+            "title": "The Lord of the Rings",
+            "author": "Tolkien"
+          }
+        ]
+      }
+    }
+    '
+    assert_equal [{:price=>8.95, :category=>"reference", :title=>"Sayings of the Century", :author=>"Nigel Rees"}, {:price=>8.99, :category=>"fiction", :isbn=>"0-553-21311-3", :title=>"Moby Dick", :author=>"Herman Melville", :color=>"blue"}], JsonPath.new('$..book[::2]').on(data, {symbolize_keys: true})
+  end
+
   def test_changed
     json =
       {
