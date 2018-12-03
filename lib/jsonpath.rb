@@ -65,8 +65,14 @@ class JsonPath
     res
   end
 
-  def on(obj_or_str)
-    enum_on(obj_or_str).to_a
+  def on(obj_or_str, opts = {})
+    a = enum_on(obj_or_str).to_a
+    if opts[:symbolize_keys]
+      a.map! do |e|
+        e.inject({}) { |memo, (k, v)| memo[k.to_sym] = v; memo }
+      end
+    end
+    a
   end
 
   def first(obj_or_str, *args)
