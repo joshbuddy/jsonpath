@@ -51,10 +51,14 @@ class JsonPath
           if array_args[0] == '*'
             start_idx = 0
             end_idx = node.size - 1
+          elsif sub_path.count(':') == 0
+            start_idx = end_idx = process_function_or_literal(array_args[0], 0)
+            next unless start_idx
+            next if start_idx >= node.size
           else
             start_idx = process_function_or_literal(array_args[0], 0)
             next unless start_idx
-            end_idx = (array_args[1] && process_function_or_literal(array_args[1], -1) || (sub_path.count(':') == 0 ? start_idx : -1))
+            end_idx = array_args[1] && ensure_exclusive_end_index(process_function_or_literal(array_args[1], -1)) || -1
             next unless end_idx
             next if start_idx == end_idx && start_idx >= node.size
           end
@@ -70,6 +74,12 @@ class JsonPath
           end
         end
       end
+    end
+
+    def ensure_exclusive_end_index(value)
+      return value unless value.is_a?(Integer) && value > 0
+
+      value - 1
     end
 
     def handle_question_mark(sub_path, node, pos, &blk)
