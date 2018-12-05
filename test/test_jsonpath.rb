@@ -49,6 +49,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_recognize_array_splices
     assert_equal [@object['store']['book'][0]], JsonPath.new('$..book[0:1:1]').on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[0:2:1]').on(@object)
     assert_equal [@object['store']['book'][1], @object['store']['book'][3], @object['store']['book'][5]], JsonPath.new('$..book[1::2]').on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2], @object['store']['book'][4], @object['store']['book'][6]], JsonPath.new('$..book[::2]').on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new('$..book[:-5:2]').on(@object)
