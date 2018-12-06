@@ -48,11 +48,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_recognize_array_splices
-    assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[0:1:1]').on(@object)
+    assert_equal [@object['store']['book'][0]], JsonPath.new('$..book[0:1:1]').on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[0:2:1]').on(@object)
     assert_equal [@object['store']['book'][1], @object['store']['book'][3], @object['store']['book'][5]], JsonPath.new('$..book[1::2]').on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2], @object['store']['book'][4], @object['store']['book'][6]], JsonPath.new('$..book[::2]').on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new('$..book[:-5:2]').on(@object)
     assert_equal [@object['store']['book'][5], @object['store']['book'][6]], JsonPath.new('$..book[5::]').on(@object)
+  end
+
+  def test_slice_array_with_exclusive_end_correctly
+    assert_equal [@object['store']['book'][0], @object['store']['book'][1]], JsonPath.new('$..book[:2]').on(@object)
   end
 
   def test_recognize_array_comma
@@ -722,7 +727,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
        { 'alfa' => 'beta11' },
        { 'alfa' => 'beta12' }] }
     expected = { 'itemList' => [{ 'alfa' => 'beta1' }] }
-    assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:11:1]').to_hash
+    assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:12:1]').to_hash
   end
 
   def test_delete_more_items_with_stepping
