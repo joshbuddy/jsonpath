@@ -84,6 +84,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
   end
 
+  def test_nested_grouping
+    path = "$..book[?((@['price'] == 19 && @['author'] == 'Herman Melville') || @['price'] == 23)]"
+    assert_equal [@object['store']['book'][3]], JsonPath.new(path).on(@object)
+  end
+
   def test_eval_with_floating_point_and_and
     assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23.0 && @['price'] > 9.0)]").on(@object)
   end
