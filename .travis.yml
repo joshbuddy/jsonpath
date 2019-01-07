@@ -4,3 +4,6 @@ rvm:
   - 2.3.1
   - ruby-head
   - jruby-head
+
+before_install:
+  - gem install bundler -v '< 2'
