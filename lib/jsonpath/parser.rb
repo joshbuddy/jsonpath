@@ -47,7 +47,7 @@ class JsonPath
                     elsif t == 'false'
                       false
                     else
-                      operator.strip == '=~' ? t.to_regexp : t.gsub(%r{^'|'$}, '').strip
+                      operator.to_s.strip == '=~' ? t.to_regexp : t.gsub(%r{^'|'$}, '').strip
                     end
         elsif t = scanner.scan(/\/\w+\//)
         elsif t = scanner.scan(/.*/)
