@@ -13,32 +13,18 @@ class JsonPath
 
     def parse(exp)
       exps = exp.split(/(&&)|(\|\|)/)
-      parse_with_map(exps)
-      # parse_nested(exps)
-      ret = parse_exp(exps.shift)
-      exps.each_with_index do |item, index|
-        case item
-        when '&&'
-          ret &&= parse_exp(exps[index + 1])
-        when '||'
-          ret ||= parse_exp(exps[index + 1])
-        end
-      end
-      ret
+      construct_expression_map(exps)
+      @_expr_map.each {|k, v| exp.sub!(k, "#{v}")}
+      eval(exp)
     end
 
-    def parse_with_map(exps)
-      # Parse the expression and put their values into a map
-      # with the expr as a key.
-      # Once that's done, parse the whole thing and
-      # use the expression map to evaluate the nested
-      # conditions.
+    def construct_expression_map(exps)
       exps.each_with_index do |item, index|
         next if item == '&&' || item == '||'
-        item = item.sub(/^\(/)
+        # trim all ) at the end and being of the item
+        item = item.strip.gsub(/\)*$/, '').gsub(/^\(*/, '')
         @_expr_map[item] = parse_exp(item)
       end
-      p @_expr_map
     end
 
     def parse_exp(exp)
@@ -95,14 +81,6 @@ class JsonPath
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
       dig(keys, hash.fetch(prev))
-    end
-
-    # (asdf(asdf))
-    def parse_nested(exps)
-      exps.each do |exp|
-        puts exp
-        # exp.chars.each{|c| puts c}
-      end
     end
   end
 end
