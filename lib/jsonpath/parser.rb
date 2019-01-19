@@ -8,10 +8,13 @@ class JsonPath
   class Parser
     def initialize(node)
       @_current_node = node
+      @_expr_map = {}
     end
 
     def parse(exp)
       exps = exp.split(/(&&)|(\|\|)/)
+      parse_with_map(exps)
+      # parse_nested(exps)
       ret = parse_exp(exps.shift)
       exps.each_with_index do |item, index|
         case item
@@ -22,6 +25,20 @@ class JsonPath
         end
       end
       ret
+    end
+
+    def parse_with_map(exps)
+      # Parse the expression and put their values into a map
+      # with the expr as a key.
+      # Once that's done, parse the whole thing and
+      # use the expression map to evaluate the nested
+      # conditions.
+      exps.each_with_index do |item, index|
+        next if item == '&&' || item == '||'
+        item = item.sub(/^\(/)
+        @_expr_map[item] = parse_exp(item)
+      end
+      p @_expr_map
     end
 
     def parse_exp(exp)
@@ -78,6 +95,14 @@ class JsonPath
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
       dig(keys, hash.fetch(prev))
+    end
+
+    # (asdf(asdf))
+    def parse_nested(exps)
+      exps.each do |exp|
+        puts exp
+        # exp.chars.each{|c| puts c}
+      end
     end
   end
 end
