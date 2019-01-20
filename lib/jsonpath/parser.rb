@@ -12,15 +12,14 @@ class JsonPath
     end
 
     def parse(exp)
-      exp = exp.gsub(/^\(/, '').gsub(/\)$/, '')
       exps = exp.split(/(&&)|(\|\|)/)
       construct_expression_map(exps)
       @_expr_map.each {|k, v| exp.sub!(k, "#{v}")}
-      raise ArgumentError, "unmatched parenthesis in expression: #{exp}" if !check_parenthesis_count(exp)
+      raise ArgumentError, "unmatched parenthesis in expression: #{exp}" unless check_parenthesis_count(exp)
       while (exp.include?("("))
         exp = parse_parentheses(exp)
       end
-      bool_me(exp)
+      bool_or_exp(exp)
     end
 
     def construct_expression_map(exps)
@@ -105,7 +104,7 @@ class JsonPath
 
       top = to_parse.split(/(&&)|(\|\|)/)
       top = top.map{|t| t.strip}
-      res = bool_me(top.shift)
+      res = bool_or_exp(top.shift)
       top.each_with_index do |item, index|
         case item
         when '&&'
@@ -115,18 +114,19 @@ class JsonPath
         end
       end
       if closing_index+1 >= str.length && opening_index == 0
-        "#{res}"
+        return "#{res}"
       else
-        "#{str[0..opening_index-1]}#{res}#{str[closing_index+1..str.length]}"
+        return "#{str[0..opening_index-1]}#{res}#{str[closing_index+1..str.length]}"
       end
     end
 
-    def bool_me(b)
+    def bool_or_exp(b)
       if "#{b}" == 'true'
-        true
+        return true
       elsif "#{b}" == 'false'
-        false
+        return false
       end
+      b = Float(b) rescue b
       b
     end
 
