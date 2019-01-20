@@ -125,6 +125,8 @@ class JsonPath
         return true
       elsif "#{b}" == 'false'
         return false
+      elsif "#{b}" == ""
+        return nil
       end
       b = Float(b) rescue b
       b
