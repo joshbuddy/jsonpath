@@ -12,16 +12,20 @@ class JsonPath
     end
 
     def parse(exp)
+      exp = exp.gsub(/^\(/, '').gsub(/\)$/, '')
       exps = exp.split(/(&&)|(\|\|)/)
       construct_expression_map(exps)
       @_expr_map.each {|k, v| exp.sub!(k, "#{v}")}
-      eval(exp)
+      raise ArgumentError, "unmatched parenthesis in expression: #{exp}" if !check_parenthesis_count(exp)
+      while (exp.include?("("))
+        exp = parse_parentheses(exp)
+      end
+      bool_me(exp)
     end
 
     def construct_expression_map(exps)
       exps.each_with_index do |item, index|
         next if item == '&&' || item == '||'
-        # trim all ) at the end and being of the item
         item = item.strip.gsub(/\)*$/, '').gsub(/^\(*/, '')
         @_expr_map[item] = parse_exp(item)
       end
@@ -81,6 +85,62 @@ class JsonPath
       return hash.fetch(keys.first) if keys.size == 1
       prev = keys.shift
       dig(keys, hash.fetch(prev))
+    end
+
+    def parse_parentheses(str)
+      opening_index = 0
+      closing_index = 0
+
+      (0..str.length-1).step(1) do |i|
+        if str[i] == '('
+          opening_index = i
+        end
+        if str[i] == ')'
+          closing_index = i
+          break
+        end
+      end
+
+      to_parse = str[opening_index+1..closing_index-1]
+
+      top = to_parse.split(/(&&)|(\|\|)/)
+      top = top.map{|t| t.strip}
+      res = bool_me(top.shift)
+      top.each_with_index do |item, index|
+        case item
+        when '&&'
+          res &&= top[index + 1]
+        when '||'
+          res ||= top[index + 1]
+        end
+      end
+      if closing_index+1 >= str.length && opening_index == 0
+        "#{res}"
+      else
+        "#{str[0..opening_index-1]}#{res}#{str[closing_index+1..str.length]}"
+      end
+    end
+
+    def bool_me(b)
+      if "#{b}" == 'true'
+        true
+      elsif "#{b}" == 'false'
+        false
+      end
+      b
+    end
+
+    def check_parenthesis_count(exp)
+      return true unless exp.include?("(")
+      depth = 0
+      exp.chars.each do |c|
+        if c == '('
+          depth += 1
+        elsif c == ')'
+          depth -= 1
+        end
+      end
+      depth == 0
     end
   end
 end
