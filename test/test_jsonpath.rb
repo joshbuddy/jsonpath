@@ -717,6 +717,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [true], JsonPath.on(json, broken_path)
   end
 
+  def test_complex_nested_grouping
+    path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville') && (@['price'] == 33 || @['price'] == 9))]"
+    assert_equal [@object['store']['book'][2]], JsonPath.new(path).on(@object)
+  end
+
+  def test_complex_nested_grouping_unmatched_parent
+    path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville' && (@['price'] == 33 || @['price'] == 9))]"
+    err = assert_raises(ArgumentError, "should have raised an exception") { JsonPath.new(path).on(@object)}
+    assert_match(/unmatched parenthesis in expression: \(\(false \|\| false && \(false \|\| true\)\)/, err.message)
+  end
+
   def test_delete_more_items
     a = { 'itemList' =>
       [{ 'alfa' => 'beta1' },
