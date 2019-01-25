@@ -125,8 +125,7 @@ class JsonPath
 
       #  handle cases like (true && true || false && true) in
       # one giant parenthesis.
-      top = to_parse.split(/(&&)|(\|\|)/)
-      top = top.map(&:strip)
+      top = to_parse.split(/(&&)|(\|\|)/).map(&:strip)
       res = bool_or_exp(top.shift)
       top.each_with_index do |item, index|
         case item
@@ -157,14 +156,9 @@ class JsonPath
     # Hence, I have to be clever here to see what kind of variable I need to
     # provide back.
     def bool_or_exp(b)
-      if b.to_s == 'true'
-        return true
-      elsif b.to_s == 'false'
-        return false
-      elsif b.to_s == ''
-        return nil
-      end
-
+      return true if b.to_s == 'true'
+      return false if b.to_s == 'false'
+      return nil if b.to_s.empty?
       b = Float(b) rescue b
       b
     end
@@ -173,15 +167,10 @@ class JsonPath
     #  parenthesis parsing business without knowing that every parenthesis
     # has its pair.
     def check_parenthesis_count(exp)
-      return true unless exp.include?('(')
-
       depth = 0
       exp.chars.each do |c|
-        if c == '('
-          depth += 1
-        elsif c == ')'
-          depth -= 1
-        end
+        depth += 1 if c == '('
+        depth -= 1 if c == ')'
       end
       depth == 0
     end
