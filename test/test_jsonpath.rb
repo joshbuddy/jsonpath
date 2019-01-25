@@ -734,7 +734,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       "test": "something"
     }
     '.to_json
-    assert_raises(RuntimeError, "RuntimeError: character '|' not supported in query") do
+    assert_raises(ArgumentError, "RuntimeError: character '|' not supported in query") do
       JsonPath.on(json, "$.description|title")
     end
   end

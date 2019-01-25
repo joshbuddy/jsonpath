@@ -36,8 +36,8 @@ class JsonPath
       elsif token = scanner.scan(/./)
         begin
           @path.last << token
-        rescue FrozenError
-          raise RuntimeError, "character '#{token}' not supported in query"
+        rescue RuntimeError
+          raise ArgumentError, "character '#{token}' not supported in query"
         end
       end
     end
