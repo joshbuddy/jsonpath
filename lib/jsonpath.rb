@@ -33,10 +33,12 @@ class JsonPath
         nil
       elsif token = scanner.scan(/[><=] \d+/)
         @path.last << token
-      # TODO: If there are characters that it can't match in the previous legs, this will throw
-      # a RuntimeError: can't modify frozen String error.
       elsif token = scanner.scan(/./)
-        @path.last << token
+        begin
+          @path.last << token
+        rescue RuntimeError
+          raise ArgumentError, "character '#{token}' not supported in query"
+        end
       end
     end
   end
@@ -69,7 +71,7 @@ class JsonPath
     a = enum_on(obj_or_str).to_a
     if opts[:symbolize_keys]
       a.map! do |e|
-        e.inject({}) { |memo, (k, v)| memo[k.to_sym] = v; memo }
+        e.each_with_object({}) { |(k, v), memo| memo[k.to_sym] = v; }
       end
     end
     a

@@ -15,6 +15,7 @@ class JsonPath
       node = key ? context[key] : context
       @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
+
       case expr = @path[pos]
       when '*', '..', '@'
         each(context, key, pos + 1, &blk)
@@ -47,6 +48,7 @@ class JsonPath
           handle_question_mark(sub_path, node, pos, &blk)
         else
           next if node.is_a?(Array) && node.empty?
+
           array_args = sub_path.split(':')
           if array_args[0] == '*'
             start_idx = 0
@@ -58,6 +60,7 @@ class JsonPath
           else
             start_idx = process_function_or_literal(array_args[0], 0)
             next unless start_idx
+
             end_idx = array_args[1] && ensure_exclusive_end_index(process_function_or_literal(array_args[1], -1)) || -1
             next unless end_idx
             next if start_idx == end_idx && start_idx >= node.size
@@ -66,6 +69,7 @@ class JsonPath
           end_idx %= node.size
           step = process_function_or_literal(array_args[2], 1)
           next unless step
+
           if @mode == :delete
             (start_idx..end_idx).step(step) { |i| node[i] = nil }
             node.compact!
