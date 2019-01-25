@@ -728,6 +728,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_match(/unmatched parenthesis in expression: \(\(false \|\| false && \(false \|\| true\)\)/, err.message)
   end
 
+  def test_runtime_error_frozen_string
+    json = '
+    {
+      "test": "something"
+    }
+    '.to_json
+    JsonPath.on(json, "$.description|title")
+  end
+
   def test_delete_more_items
     a = { 'itemList' =>
       [{ 'alfa' => 'beta1' },
