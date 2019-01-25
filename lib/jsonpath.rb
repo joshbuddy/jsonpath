@@ -33,10 +33,12 @@ class JsonPath
         nil
       elsif token = scanner.scan(/[><=] \d+/)
         @path.last << token
-      # TODO: If there are characters that it can't match in the previous legs, this will throw
-      # a RuntimeError: can't modify frozen String error.
       elsif token = scanner.scan(/./)
-        @path.last << token
+        begin
+          @path.last << token
+        rescue FrozenError
+          raise RuntimeError, "character '#{token}' not supported in query"
+        end
       end
     end
   end

@@ -734,7 +734,9 @@ class TestJsonpath < MiniTest::Unit::TestCase
       "test": "something"
     }
     '.to_json
-    JsonPath.on(json, "$.description|title")
+    assert_raises(RuntimeError, "RuntimeError: character '|' not supported in query") do
+      JsonPath.on(json, "$.description|title")
+    end
   end
 
   def test_delete_more_items
