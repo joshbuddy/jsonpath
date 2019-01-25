@@ -5,7 +5,8 @@ require 'multi_json'
 require 'jsonpath/proxy'
 require 'jsonpath/enumerable'
 require 'jsonpath/version'
-require 'jsonpath/parser'
+require 'jsonpath/jsonparser'
+require 'jsonpath/processor'
 
 # JsonPath: initializes the class with a given JsonPath and parses that path
 # into a token array.

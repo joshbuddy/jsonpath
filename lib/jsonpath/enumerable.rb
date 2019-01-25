@@ -140,12 +140,12 @@ class JsonPath
           el == '@' ? '@' : "['#{el}']"
         end.join
         begin
-          return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
+          return JsonPath::JsonParser.new(@_current_node).parse(exp_to_eval)
         rescue StandardError
           return default
         end
       end
-      JsonPath::Parser.new(@_current_node).parse(exp)
+      JsonPath::JsonParser.new(@_current_node).parse(exp)
     end
   end
 end

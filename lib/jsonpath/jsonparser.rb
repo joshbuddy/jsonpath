@@ -6,7 +6,7 @@ require 'parser/current'
 
 class JsonPath
   # Parser parses and evaluates an expression passed to @_current_node.
-  class Parser
+  class JsonParser
     def initialize(node)
       @_current_node = node
       @_expr_map = {}
@@ -24,6 +24,11 @@ class JsonPath
     # (false && true)
     #  false
     def parse(exp)
+      exp2 = exp.gsub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').tr('"', '\'').strip
+      parsed_code = Parser::CurrentRuby.parse(exp2)
+      ast = JsonPath::Processor.new
+      ast.process(parsed_code)
+
       exps = exp.split(/(&&)|(\|\|)/)
       construct_expression_map(exps)
       @_expr_map.each { |k, v| exp.sub!(k, v.to_s) }
@@ -51,9 +56,6 @@ class JsonPath
     # there is a match in the JSON for it or not.
     def parse_exp(exp)
       exp = exp.sub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').tr('"', '\'').strip
-      parsed_code = Parser::Parser::CurrentRuby.parse(exp)
-      ast = JsonPath::Processor.new
-      ast.process(parsed_code)
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
