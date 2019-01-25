@@ -228,18 +228,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
             'delete_me' => [
               'no' => 'do not'
             ]
-          }
-        },
+          } },
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',
-          'price' => 13
-        },
+          'price' => 13 },
         { 'category' => 'fiction',
           'author' => 'Aasdf',
           'title' => 'Aaasdf2',
-          'price' => 1
-        }
+          'price' => 1 }
       ]
     } }
     json_deleted = { 'store' => {
@@ -249,18 +246,15 @@ class TestJsonpath < MiniTest::Unit::TestCase
           'title' => 'Sayings of the Century',
           'price' => 9,
           'tags' => %w[asdf asdf2],
-          'this' => {}
-        },
+          'this' => {} },
         { 'category' => 'fiction',
           'author' => 'Evelyn Waugh',
           'title' => 'Sword of Honour',
-          'price' => 13
-        },
+          'price' => 13 },
         { 'category' => 'fiction',
           'author' => 'Aasdf',
           'title' => 'Aaasdf2',
-          'price' => 1
-        }
+          'price' => 1 }
       ]
     } }
     assert_equal(json_deleted, JsonPath.for(json).delete('$..store.book..delete_me').obj)
@@ -605,19 +599,19 @@ class TestJsonpath < MiniTest::Unit::TestCase
     json = {
       channels: [
         {
-          name: "King's Speech",
+          name: "King's Speech"
         }
       ]
     }.to_json
 
-    assert_equal [{"name" => "King\'s Speech"}], JsonPath.on(json, "$..channels[?(@.name == 'King\'s Speech')]")
+    assert_equal [{ 'name' => "King\'s Speech" }], JsonPath.on(json, "$..channels[?(@.name == 'King\'s Speech')]")
   end
 
   def test_curly_brackets
     data = {
       '{data}' => 'data'
     }
-    assert_equal ['data'], JsonPath.new("$.{data}").on(data)
+    assert_equal ['data'], JsonPath.new('$.{data}').on(data)
   end
 
   def test_symbolize
@@ -660,7 +654,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
       }
     }
     '
-    assert_equal [{:price=>8.95, :category=>"reference", :title=>"Sayings of the Century", :author=>"Nigel Rees"}, {:price=>8.99, :category=>"fiction", :isbn=>"0-553-21311-3", :title=>"Moby Dick", :author=>"Herman Melville", :color=>"blue"}], JsonPath.new('$..book[::2]').on(data, {symbolize_keys: true})
+    assert_equal [{ price: 8.95, category: 'reference', title: 'Sayings of the Century', author: 'Nigel Rees' }, { price: 8.99, category: 'fiction', isbn: '0-553-21311-3', title: 'Moby Dick', author: 'Herman Melville', color: 'blue' }], JsonPath.new('$..book[::2]').on(data, symbolize_keys: true)
   end
 
   def test_changed
@@ -724,7 +718,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_complex_nested_grouping_unmatched_parent
     path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville' && (@['price'] == 33 || @['price'] == 9))]"
-    err = assert_raises(ArgumentError, "should have raised an exception") { JsonPath.new(path).on(@object)}
+    err = assert_raises(ArgumentError, 'should have raised an exception') { JsonPath.new(path).on(@object) }
     assert_match(/unmatched parenthesis in expression: \(\(false \|\| false && \(false \|\| true\)\)/, err.message)
   end
 
@@ -736,7 +730,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }
     '.to_json
     assert_raises(ArgumentError, "RuntimeError: character '|' not supported in query") do
-      JsonPath.on(json, "$.description|title")
+      JsonPath.on(json, '$.description|title')
     end
   end
 

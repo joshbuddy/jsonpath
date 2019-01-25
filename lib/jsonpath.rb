@@ -71,7 +71,7 @@ class JsonPath
     a = enum_on(obj_or_str).to_a
     if opts[:symbolize_keys]
       a.map! do |e|
-        e.inject({}) { |memo, (k, v)| memo[k.to_sym] = v; memo }
+        e.each_with_object({}) { |(k, v), memo| memo[k.to_sym] = v; }
       end
     end
     a
