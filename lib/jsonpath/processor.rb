@@ -4,13 +4,26 @@ class JsonPath
   class Processor
     include AST::Processor::Mixin
 
+    def initialize(node)
+      @node = node
+    end
+
     def on_begin(node)
       node.children.each { |c| process(c) }
     end
 
     def on_send(node)
       puts '==== SEND ===='
-      node {|l, r| p l, r}
+      # p node
+      # node {|l, r| p l, r}
+      left, right = *node
+      a, _ = *left.children.first
+      # puts "left value: #{left_value}"
+      # p right
+      # p @node
+      b = @node.dig(a)
+      v = node.children[2].children.first
+      puts "res: #{b.send(right, v)}"
       puts '==== SEND ===='
     end
 

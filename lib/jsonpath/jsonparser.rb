@@ -26,8 +26,8 @@ class JsonPath
     def parse(exp)
       exp2 = exp.gsub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').tr('"', '\'').strip
       parsed_code = Parser::CurrentRuby.parse(exp2)
-      ast = JsonPath::Processor.new
-      ast.process(parsed_code)
+      ast = JsonPath::Processor.new(@_current_node)
+      p ast.process(parsed_code)
 
       exps = exp.split(/(&&)|(\|\|)/)
       construct_expression_map(exps)
