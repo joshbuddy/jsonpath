@@ -53,7 +53,7 @@ class JsonPath
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
-        if t = scanner.scan(%r{\['[a-zA-Z@&\*/\$%\^\?_]+'\]|\.[a-z?]+})
+        if t = scanner.scan(%r{\['[a-zA-Z@&\*/\$%\^\?_]+'\]|\.[a-zA-Z_?]+})
           elements << t.gsub(/[\[\]'\.]|\s+/, '')
         elsif t = scanner.scan(/(\s+)?[<>=!\-+][=~]?(\s+)?/)
           operator = t
