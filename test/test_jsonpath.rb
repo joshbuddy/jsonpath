@@ -119,6 +119,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['bicycle']['2seater']], JsonPath.new('$.store.bicycle.2seater').on(@object)
   end
 
+  def test_recognized_dot_notation_in_filters
+    assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new('$..book[?(@.isbn)]').on(@object)
+  end
+
+  def test_works_on_non_hash
+    klass = Struct.new(:a, :b)
+    object = klass.new('some', 'value')
+
+    assert_equal ['value'], JsonPath.new('$.b').on(object)
+  end
+
   def test_recognize_array_with_evald_index
     assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-5)]').on(@object)
   end
