@@ -61,7 +61,7 @@ class JsonPath
         end
         if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]+/)
           elements << t.gsub(/\[|\]|'|\s+/, '')
-        elsif t = scanner.scan(/(\s+)?[<>=][=~]?(\s+)?/)
+        elsif t = scanner.scan(/(\s+)?[<>=!][=~]?(\s+)?/)
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           # If we encounter a node which does not contain `'` it means
