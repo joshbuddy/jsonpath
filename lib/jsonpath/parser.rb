@@ -85,8 +85,7 @@ class JsonPath
           end
         end
 
-      return false if el.nil?
-      return true if operator.nil? && el
+      return (el ? true : false) if el.nil? || operator.nil?
 
       el =
         begin
