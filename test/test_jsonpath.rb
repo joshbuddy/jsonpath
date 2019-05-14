@@ -70,6 +70,12 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] == 9)]").on(@object)
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
+    assert_equal [
+      @object['store']['book'][0],
+      @object['store']['book'][4],
+      @object['store']['book'][5],
+      @object['store']['book'][6]
+    ], JsonPath.new("$..book[?(@['category'] != 'fiction')]").on(@object)
   end
 
   def test_or_operator
