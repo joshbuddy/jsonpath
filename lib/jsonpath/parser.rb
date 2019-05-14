@@ -53,15 +53,9 @@ class JsonPath
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
-        if scanner.scan(/\./)
-          sym = scanner.scan(/\w+/)
-          op = scanner.scan(/./)
-          num = scanner.scan(/\d+/)
-          return @_current_node.send(sym.to_sym).send(op.to_sym, num.to_i)
-        end
-        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]+/)
-          elements << t.gsub(/\[|\]|'|\s+/, '')
-        elsif t = scanner.scan(/(\s+)?[<>=!][=~]?(\s+)?/)
+        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]|\.[a-zA-Z0-9_]+[?!]?/)
+          elements << t.gsub(/[\[\]'\.]|\s+/, '')
+        elsif t = scanner.scan(/(\s+)?[<>=!\-+][=~]?(\s+)?/)
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           # If we encounter a node which does not contain `'` it means
@@ -81,9 +75,14 @@ class JsonPath
 
       el = if elements.empty?
              @_current_node
+           elsif @_current_node.is_a?(Hash)
+             @_current_node.dig(*elements)
            else
-             dig(elements, @_current_node)
+             elements.inject(@_current_node) do |agg, key|
+               agg.__send__(key)
+             end
            end
+
       return false if el.nil?
       return true if operator.nil? && el
 
@@ -94,16 +93,6 @@ class JsonPath
     end
 
     private
-
-    # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3
-    def dig(keys, hash)
-      return nil unless hash.is_a? Hash
-      return nil unless hash.key?(keys.first)
-      return hash.fetch(keys.first) if keys.size == 1
-
-      prev = keys.shift
-      dig(keys, hash.fetch(prev))
-    end
 
     #  This will break down a parenthesis from the left to the right
     #  and replace the given expression with it's returned value.
