@@ -130,6 +130,14 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['value'], JsonPath.new('$.b').on(object)
   end
 
+  def test_works_on_non_hash_with_filters
+    klass = Struct.new(:a, :b)
+    first_object = klass.new('some', 'value')
+    second_object = klass.new('next', 'other value')
+
+    assert_equal ['other value'], JsonPath.new('$[?(@.a == "next")].b').on([first_object, second_object])
+  end
+
   def test_recognize_array_with_evald_index
     assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-5)]').on(@object)
   end
