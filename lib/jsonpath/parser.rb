@@ -53,15 +53,9 @@ class JsonPath
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
-        if scanner.scan(/\./)
-          sym = scanner.scan(/\w+/)
-          op = scanner.scan(/./)
-          num = scanner.scan(/\d+/)
-          return @_current_node.send(sym.to_sym).send(op.to_sym, num.to_i)
-        end
-        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]+/)
-          elements << t.gsub(/\[|\]|'|\s+/, '')
-        elsif t = scanner.scan(/(\s+)?[<>=!][=~]?(\s+)?/)
+        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]|\.[a-zA-Z0-9_]+[?!]?/)
+          elements << t.gsub(/[\[\]'\.]|\s+/, '')
+        elsif t = scanner.scan(/(\s+)?[<>=!\-+][=~]?(\s+)?/)
           operator = t
         elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
           # If we encounter a node which does not contain `'` it means
@@ -81,9 +75,14 @@ class JsonPath
 
       el = if elements.empty?
              @_current_node
-           else
+           elsif @_current_node.is_a?(Hash)
              dig(elements, @_current_node)
+           else
+             elements.inject(@_current_node) do |agg, key|
+               agg.__send__(key)
+             end
            end
+
       return false if el.nil?
       return true if operator.nil? && el
 
