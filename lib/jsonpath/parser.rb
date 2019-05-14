@@ -76,7 +76,7 @@ class JsonPath
       el = if elements.empty?
              @_current_node
            elsif @_current_node.is_a?(Hash)
-             dig(elements, @_current_node)
+             @_current_node.dig(*elements)
            else
              elements.inject(@_current_node) do |agg, key|
                agg.__send__(key)
@@ -93,16 +93,6 @@ class JsonPath
     end
 
     private
-
-    # @TODO: Remove this once JsonPath no longer supports ruby versions below 2.3
-    def dig(keys, hash)
-      return nil unless hash.is_a? Hash
-      return nil unless hash.key?(keys.first)
-      return hash.fetch(keys.first) if keys.size == 1
-
-      prev = keys.shift
-      dig(keys, hash.fetch(prev))
-    end
 
     #  This will break down a parenthesis from the left to the right
     #  and replace the given expression with it's returned value.
