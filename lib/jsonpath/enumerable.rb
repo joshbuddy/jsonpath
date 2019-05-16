@@ -12,7 +12,12 @@ class JsonPath
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
-      node = key ? context[key] : context
+      node =
+        if key
+          context.is_a?(Hash) || context.is_a?(Array) ? context[key] : context.__send__(key)
+        else
+          context
+        end
       @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
 
@@ -39,10 +44,12 @@ class JsonPath
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
+          k = sub_path[1, sub_path.size - 2]
           if node.is_a?(Hash)
-            k = sub_path[1, sub_path.size - 2]
             node[k] ||= nil if @options[:default_path_leaf_to_null]
             each(node, k, pos + 1, &blk) if node.key?(k)
+          elsif node.respond_to?(k.to_s)
+            each(node, k, pos + 1, &blk)
           end
         when '?'
           handle_question_mark(sub_path, node, pos, &blk)
