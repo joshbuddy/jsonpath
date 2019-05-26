@@ -820,6 +820,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }
     '.to_json
     assert_equal [[{ 'type' => 'home', 'number' => '0123-4567-8910' }]], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
+    assert_equal [], JsonPath.on(json, "$.phoneNumbers[?(@[2].type == 'home')]")
+    json = '
+    {
+      "phoneNumbers":
+        {
+          "type"  : "iPhone",
+          "number": "0123-4567-8888"
+        }
+    }
+    '.to_json
+    assert_equal [], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
   end
 
   def example_object
