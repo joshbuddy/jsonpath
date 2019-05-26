@@ -10,11 +10,11 @@ class JsonPath
     end
 
     def gsub(path, replacement = nil, &replacement_block)
-      _gsub(_deep_copy, path, replacement ? proc { replacement } : replacement_block)
+      _gsub(_deep_copy, path, replacement ? proc(&method(:replacement)) : replacement_block)
     end
 
     def gsub!(path, replacement = nil, &replacement_block)
-      _gsub(@obj, path, replacement ? proc { replacement } : replacement_block)
+      _gsub(@obj, path, replacement ? proc(&method(:replacement)) : replacement_block)
     end
 
     def delete(path = JsonPath::PATH_ALL)

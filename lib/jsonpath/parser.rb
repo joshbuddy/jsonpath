@@ -46,18 +46,26 @@ class JsonPath
       end
     end
 
-    #  using a scanner break down the individual expressions and determine if
+    # Using a scanner break down the individual expressions and determine if
     # there is a match in the JSON for it or not.
     def parse_exp(exp)
       exp = exp.sub(/@/, '').gsub(/^\(/, '').gsub(/\)$/, '').tr('"', '\'').strip
+      exp.scan(/^\[(\d+)\]/) do |i|
+        next if i.empty?
+
+        index = Integer(i[0])
+        @_current_node = @_current_node[index]
+        # Remove the extra '' and the index.
+        exp = exp.gsub(/^\[\d+\]|\[''\]/, '')
+      end
       scanner = StringScanner.new(exp)
       elements = []
       until scanner.eos?
-        if t = scanner.scan(/\['[a-zA-Z@&\*\/\$%\^\?_]+'\]|\.[a-zA-Z0-9_]+[?!]?/)
+        if (t = scanner.scan(/\['[a-zA-Z@&*\/$%^?_]+'\]|\.[a-zA-Z0-9_]+[?!]?/))
           elements << t.gsub(/[\[\]'\.]|\s+/, '')
-        elsif t = scanner.scan(/(\s+)?[<>=!\-+][=~]?(\s+)?/)
+        elsif (t = scanner.scan(/(\s+)?[<>=!\-+][=~]?(\s+)?/))
           operator = t
-        elsif t = scanner.scan(/(\s+)?'?.*'?(\s+)?/)
+        elsif (t = scanner.scan(/(\s+)?'?.*'?(\s+)?/))
           # If we encounter a node which does not contain `'` it means
           #  that we are dealing with a boolean type.
           operand = if t == 'true'
@@ -67,8 +75,8 @@ class JsonPath
                     else
                       operator.to_s.strip == '=~' ? t.to_regexp : t.gsub(%r{^'|'$}, '').strip
                     end
-        elsif t = scanner.scan(/\/\w+\//)
-        elsif t = scanner.scan(/.*/)
+        elsif (t = scanner.scan(/\/\w+\//))
+        elsif (t = scanner.scan(/.*/))
           raise "Could not process symbol: #{t}"
         end
       end
@@ -78,9 +86,7 @@ class JsonPath
            elsif @_current_node.is_a?(Hash)
              @_current_node.dig(*elements)
            else
-             elements.inject(@_current_node) do |agg, key|
-               agg.__send__(key)
-             end
+             elements.inject(@_current_node, &:__send__)
            end
 
       return (el ? true : false) if el.nil? || operator.nil?
@@ -117,10 +123,9 @@ class JsonPath
       top = top.map(&:strip)
       res = bool_or_exp(top.shift)
       top.each_with_index do |item, index|
-        case item
-        when '&&'
+        if item == '&&'
           res &&= top[index + 1]
-        when '||'
+        elsif item == '||'
           res ||= top[index + 1]
         end
       end
@@ -129,9 +134,9 @@ class JsonPath
       # and the closing index will be the last index. To avoid
       # off-by-one errors we simply return the result at that point.
       if closing_index + 1 >= str.length && opening_index == 0
-        return res.to_s
+        res.to_s
       else
-        return "#{str[0..opening_index - 1]}#{res}#{str[closing_index + 1..str.length]}"
+        "#{str[0..opening_index - 1]}#{res}#{str[closing_index + 1..str.length]}"
       end
     end
 

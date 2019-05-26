@@ -804,6 +804,24 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal expected, JsonPath.for(a.to_json).delete('$.itemList[1:6:2]').to_hash
   end
 
+  def test_nested_values
+    json = '
+    {
+      "phoneNumbers": [
+        [{
+          "type"  : "iPhone",
+          "number": "0123-4567-8888"
+        }],
+        [{
+          "type"  : "home",
+          "number": "0123-4567-8910"
+        }]
+      ]
+    }
+    '.to_json
+    assert_equal [[{ 'type' => 'home', 'number' => '0123-4567-8910' }]], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
+  end
+
   def example_object
     { 'store' => {
       'book' => [
