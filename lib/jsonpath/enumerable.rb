@@ -30,15 +30,14 @@ class JsonPath
         handle_wildecard(node, expr, context, key, pos, &blk)
       when /\(.*\)/
         keys = expr.gsub(/[()]/, '').split(',').map(&:to_s)
-        case context
-        when Hash
-          new_context = context.slice(*keys)
-        when Array
-          new_context = []
-          context.each do |c|
-            new_context << c.slice(*keys)
-          end
-        end
+        new_context = case context
+                      when Hash
+                        context.slice(*keys)
+                      when Array
+                        context.each_with_object([]) do |c, memo|
+                          memo << c.slice(*keys)
+                        end
+                      end
         yield_value(blk, new_context, key)
       end
 
