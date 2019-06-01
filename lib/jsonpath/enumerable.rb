@@ -32,10 +32,11 @@ class JsonPath
         keys = expr.gsub(/[()]/, '').split(',').map(&:to_s)
         new_context = case context
                       when Hash
-                        context.slice(*keys)
+                        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
+                        context.select { |k| keys.include?(k) }
                       when Array
                         context.each_with_object([]) do |c, memo|
-                          memo << c.slice(*keys)
+                          memo << c.select { |k| keys.include?(k) }
                         end
                       end
         yield_value(blk, new_context, key)
