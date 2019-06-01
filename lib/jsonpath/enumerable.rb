@@ -28,6 +28,18 @@ class JsonPath
         each(context, key, pos + 1, &blk) if node == @object
       when /^\[(.*)\]$/
         handle_wildecard(node, expr, context, key, pos, &blk)
+      when /\(.*\)/
+        keys = expr.gsub(/[()]/, '').split(',').map(&:to_s)
+        case context
+        when Hash
+          new_context = context.slice(*keys)
+        when Array
+          new_context = []
+          context.each do |c|
+            new_context << c.slice(*keys)
+          end
+        end
+        yield_value(blk, new_context, key)
       end
 
       if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
@@ -148,7 +160,7 @@ class JsonPath
         end.join
         begin
           return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
-        rescue StandardError
+        rescue StandardError => e
           return default
         end
       end

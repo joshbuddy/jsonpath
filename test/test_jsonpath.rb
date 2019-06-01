@@ -833,6 +833,56 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
   end
 
+  def test_selecting_multiple_keys
+    json = '
+    {
+      "store": {
+        "book": [
+          {
+            "category": "reference",
+            "author": "Nigel Rees",
+            "title": "Sayings of the Century",
+            "price": 8.95
+          },
+          {
+            "category": "fiction",
+             "author": "Evelyn Waugh",
+             "title": "Sword of Honour",
+             "price": 12.99
+          }
+        ]
+      }
+    }
+    '.to_json
+
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }, { 'category' => 'fiction', 'author' => 'Evelyn Waugh' }], JsonPath.on(json, '$.store.book[*](category,author)')
+  end
+
+  def test_selecting_multiple_keys_with_filter
+    json = '
+    {
+      "store": {
+        "book": [
+          {
+            "category": "reference",
+            "author": "Nigel Rees",
+            "title": "Sayings of the Century",
+            "price": 8.95
+          },
+          {
+            "category": "fiction",
+             "author": "Evelyn Waugh",
+             "title": "Sword of Honour",
+             "price": 12.99
+          }
+        ]
+      }
+    }
+    '.to_json
+
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](category,author)")
+  end
+
   def example_object
     { 'store' => {
       'book' => [
