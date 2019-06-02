@@ -123,6 +123,51 @@ For more usage examples and variations on paths, please visit the tests. There a
   end
 ```
 
+### Selecting Values
+
+It's possible to select results once a query has been defined after the query. For example given this JSON data:
+
+```bash
+{
+    "store": {
+        "book": [
+            {
+                "category": "reference",
+                "author": "Nigel Rees",
+                "title": "Sayings of the Century",
+                "price": 8.95
+            },
+            {
+                "category": "fiction",
+                "author": "Evelyn Waugh",
+                "title": "Sword of Honour",
+                "price": 12.99
+            }
+        ]
+}
+```
+
+... and this query:
+
+```ruby
+"$.store.book[*](category,author)"
+```
+
+... the result can be filtered as such:
+
+```bash
+[
+   {
+      "category" : "reference",
+      "author" : "Nigel Rees"
+   },
+   {
+      "category" : "fiction",
+      "author" : "Evelyn Waugh"
+   }
+]
+```
+
 ### Running an individual test
 
 ```ruby
