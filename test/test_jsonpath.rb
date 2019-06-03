@@ -881,6 +881,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     '.to_json
 
     assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](category,author)")
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](   category, author   )")
   end
 
   def example_object
