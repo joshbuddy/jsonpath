@@ -30,15 +30,7 @@ class JsonPath
         handle_wildecard(node, expr, context, key, pos, &blk)
       when /\(.*\)/
         keys = expr.gsub(/[()]/, '').split(',').map(&:to_s)
-        new_context = case context
-                      when Hash
-                        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
-                        context.select { |k| keys.include?(k) }
-                      when Array
-                        context.each_with_object([]) do |c, memo|
-                          memo << c.select { |k| keys.include?(k) }
-                        end
-                      end
+        new_context = filter_context(context, keys)
         yield_value(blk, new_context, key)
       end
 
@@ -51,6 +43,18 @@ class JsonPath
     end
 
     private
+
+    def filter_context(context, keys)
+      case context
+      when Hash
+        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
+        context.select { |k| keys.include?(k) }
+      when Array
+        context.each_with_object([]) do |c, memo|
+          memo << c.select { |k| keys.include?(k) }
+        end
+      end
+    end
 
     def handle_wildecard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|
@@ -160,7 +164,7 @@ class JsonPath
         end.join
         begin
           return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
-        rescue StandardError => e
+        rescue StandardError
           return default
         end
       end
