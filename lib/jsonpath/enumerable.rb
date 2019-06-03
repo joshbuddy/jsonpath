@@ -28,6 +28,10 @@ class JsonPath
         each(context, key, pos + 1, &blk) if node == @object
       when /^\[(.*)\]$/
         handle_wildecard(node, expr, context, key, pos, &blk)
+      when /\(.*\)/
+        keys = expr.gsub(/[()]/, '').split(',').map(&:strip)
+        new_context = filter_context(context, keys)
+        yield_value(blk, new_context, key)
       end
 
       if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
@@ -39,6 +43,18 @@ class JsonPath
     end
 
     private
+
+    def filter_context(context, keys)
+      case context
+      when Hash
+        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
+        context.select { |k| keys.include?(k) }
+      when Array
+        context.each_with_object([]) do |c, memo|
+          memo << c.select { |k| keys.include?(k) }
+        end
+      end
+    end
 
     def handle_wildecard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|

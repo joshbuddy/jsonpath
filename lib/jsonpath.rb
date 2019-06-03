@@ -10,7 +10,7 @@ require 'jsonpath/parser'
 # JsonPath: initializes the class with a given JsonPath and parses that path
 # into a token array.
 class JsonPath
-  PATH_ALL = '$..*'.freeze
+  PATH_ALL = '$..*'
 
   attr_accessor :path
 
@@ -19,21 +19,23 @@ class JsonPath
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
-      if token = scanner.scan(/\$\B|@\B|\*|\.\./)
+      if (token = scanner.scan(/\$\B|@\B|\*|\.\./))
         @path << token
-      elsif token = scanner.scan(/[\$@a-zA-Z0-9:{}_-]+/)
+      elsif (token = scanner.scan(/[$@a-zA-Z0-9:{}_-]+/))
         @path << "['#{token}']"
-      elsif token = scanner.scan(/'(.*?)'/)
+      elsif (token = scanner.scan(/'(.*?)'/))
         @path << "[#{token}]"
-      elsif token = scanner.scan(/\[/)
+      elsif (token = scanner.scan(/\[/))
         @path << find_matching_brackets(token, scanner)
-      elsif token = scanner.scan(/\]/)
+      elsif (token = scanner.scan(/\]/))
         raise ArgumentError, 'unmatched closing bracket'
+      elsif (token = scanner.scan(/\(.*\)/))
+        @path << token
       elsif scanner.scan(/\./)
         nil
-      elsif token = scanner.scan(/[><=] \d+/)
+      elsif (token = scanner.scan(/[><=] \d+/))
         @path.last << token
-      elsif token = scanner.scan(/./)
+      elsif (token = scanner.scan(/./))
         begin
           @path.last << token
         rescue RuntimeError
@@ -46,13 +48,13 @@ class JsonPath
   def find_matching_brackets(token, scanner)
     count = 1
     until count.zero?
-      if t = scanner.scan(/\[/)
+      if (t = scanner.scan(/\[/))
         token << t
         count += 1
-      elsif t = scanner.scan(/\]/)
+      elsif (t = scanner.scan(/\]/))
         token << t
         count -= 1
-      elsif t = scanner.scan(/[^\[\]]+/)
+      elsif (t = scanner.scan(/[^\[\]]+/))
         token << t
       elsif scanner.eos?
         raise ArgumentError, 'unclosed bracket'
