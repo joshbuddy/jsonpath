@@ -64,8 +64,20 @@ class JsonPath
           if node.is_a?(Hash)
             node[k] ||= nil if @options[:default_path_leaf_to_null]
             each(node, k, pos + 1, &blk) if node.key?(k)
-          elsif node.respond_to?(k.to_s)
-            each(node, k, pos + 1, &blk)
+          else
+            # This check exists because ruby Object is the base of everything. So calling this with
+            # something like send, to_i, hash (for equality), will produce an answer.
+            # But we want to keep respond_to because Struct(:a, :b) is a thing.
+            # And so is calling $.a or $..[whatever].b
+            # I did try adding yield_value some checks but that failed for different reasons.
+            case node
+            when String
+            when Integer
+            when Hash
+            when Array
+            else
+              each(node, k, pos + 1, &blk) if node.respond_to?(k.to_s)
+            end
           end
         when '?'
           handle_question_mark(sub_path, node, pos, &blk)
