@@ -917,6 +917,9 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal(["some_hash"], hs.on(j))
     hs = JsonPath.new "$..send"
     assert_equal([], hs.on(j))
+    j = {height: 5, send: "should_still_work"}.to_json
+    hs = JsonPath.new "$..send"
+    assert_equal(['should_still_work'], hs.on(j))
   end
 
   def example_object
