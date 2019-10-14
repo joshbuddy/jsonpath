@@ -64,7 +64,7 @@ class JsonPath
           if node.is_a?(Hash)
             node[k] ||= nil if @options[:default_path_leaf_to_null]
             each(node, k, pos + 1, &blk) if node.key?(k)
-          elsif node.respond_to?(k.to_s)
+          elsif node.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
             each(node, k, pos + 1, &blk)
           end
         when '?'

@@ -909,6 +909,19 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'cate gory' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](   cate gory, author   )")
   end
 
+  def test_object_method_send
+    j = {height: 5, hash: "some_hash"}.to_json
+    hs = JsonPath.new "$..send"
+    assert_equal([], hs.on(j))
+    hs = JsonPath.new "$..hash"
+    assert_equal(["some_hash"], hs.on(j))
+    hs = JsonPath.new "$..send"
+    assert_equal([], hs.on(j))
+    j = {height: 5, send: "should_still_work"}.to_json
+    hs = JsonPath.new "$..send"
+    assert_equal(['should_still_work'], hs.on(j))
+  end
+
   def example_object
     { 'store' => {
       'book' => [
