@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require 'strscan'
-require 'to_regexp'
 
 class JsonPath
   # Parser parses and evaluates an expression passed to @_current_node.
   class Parser
+    REGEX = /\A\/(.+)\/([imxnesu]*)\z|\A%r{(.+)}([imxnesu]*)\z/
+
     def initialize(node)
       @_current_node = node
       @_expr_map = {}
@@ -71,13 +72,16 @@ class JsonPath
         elsif (t = scanner.scan(/(\s+)?'?.*'?(\s+)?/))
           # If we encounter a node which does not contain `'` it means
           #  that we are dealing with a boolean type.
-          operand = if t == 'true'
-                      true
-                    elsif t == 'false'
-                      false
-                    else
-                      operator.to_s.strip == '=~' ? t.to_regexp : t.gsub(%r{^'|'$}, '').strip
-                    end
+          operand =
+            if t == 'true'
+              true
+            elsif t == 'false'
+              false
+            elsif operator.to_s.strip == '=~'
+              parse_regex(t)
+            else
+              t.gsub(%r{^'|'$}, '').strip
+            end
         elsif (t = scanner.scan(/\/\w+\//))
         elsif (t = scanner.scan(/.*/))
           raise "Could not process symbol: #{t}"
@@ -101,6 +105,31 @@ class JsonPath
     end
 
     private
+
+    # /foo/i -> Regex.new("foo", Regexp::IGNORECASE) without using eval
+    # also supports %r{foo}i
+    # following https://github.com/seamusabshere/to_regexp/blob/master/lib/to_regexp.rb
+    def parse_regex(t)
+      t =~ REGEX
+      content = $1 || $3
+      options = $2 || $4
+
+      raise "unsupported regex #{t} use /foo/ style" if !content || !options
+
+      content = content.gsub '\\/', '/'
+
+      flags = 0
+      flags |= Regexp::IGNORECASE if options.include?('i')
+      flags |= Regexp::MULTILINE if options.include?('m')
+      flags |= Regexp::EXTENDED if options.include?('x')
+
+      # 'n' = none, 'e' = EUC, 's' = SJIS, 'u' = UTF-8
+      lang = options.scan(/[nes]/).join.downcase # ignores u since that is default and causes a warning
+
+      args = [content, flags]
+      args << lang unless lang.empty? # avoid warning
+      Regexp.new(*args)
+    end
 
     #  This will break down a parenthesis from the left to the right
     #  and replace the given expression with it's returned value.
