@@ -748,7 +748,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_runtime_error_frozen_string
-    skip('in ruby version below 2.2.0 this error is not raised') if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.0')
+    skip('in ruby version below 2.2.0 this error is not raised') if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.0') || Gem::Version.new(RUBY_VERSION) > Gem::Version::new('2.6')
     json = '
     {
       "test": "something"
