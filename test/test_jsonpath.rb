@@ -511,15 +511,31 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'isTrue' => true, 'name' => 'testname1' }], JsonPath.new('$.data[?(@.isTrue)]').on(data)
   end
 
-  def test_regex
-    assert_equal [], JsonPath.new('$..book[?(@.author =~ /herman/)]').on(@object)
+  def test_regex_simple
+    assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ /asdf/)]').on(@object)
+  end
+
+  def test_regex_simple_miss
+    assert_equal [], JsonPath.new('$.store.book..tags[?(@ =~ /wut/)]').on(@object)
+  end
+
+  def test_regex_r
+    assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ %r{asdf})]').on(@object)
+  end
+
+  def test_regex_flags
     assert_equal [
       @object['store']['book'][2],
       @object['store']['book'][4],
       @object['store']['book'][5],
       @object['store']['book'][6]
     ], JsonPath.new('$..book[?(@.author =~ /herman|lukyanenko/i)]').on(@object)
-    assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ /asdf/)]').on(@object)
+  end
+
+  def test_regex_error
+    assert_raises ArgumentError do
+      JsonPath.new('$.store.book..tags[?(@ =~ asdf)]').on(@object)
+    end
   end
 
   def test_regression_1
