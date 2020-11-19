@@ -114,7 +114,7 @@ class JsonPath
       content = $1 || $3
       options = $2 || $4
 
-      raise "unsupported regex #{t} use /foo/ style" if !content || !options
+      raise ArgumentError, "unsupported regex #{t} use /foo/ style" if !content || !options
 
       content = content.gsub '\\/', '/'
 
