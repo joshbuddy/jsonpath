@@ -938,6 +938,13 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal(['should_still_work'], hs.on(j))
   end
 
+  def test_index_access_by_number
+    data = {
+      '1': 'foo'
+    }
+    assert_equal ['foo'], JsonPath.new('$.1').on(data.to_json)
+  end
+
   def example_object
     { 'store' => {
       'book' => [

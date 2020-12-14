@@ -128,7 +128,6 @@ class JsonPath
     end
 
     def yield_value(blk, context, key)
-      key = Integer(key) rescue key if key
       case @mode
       when nil
         blk.call(key ? context[key] : context)
