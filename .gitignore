@@ -6,3 +6,5 @@ doc/*
 .DS_Store
 .idea
 vendor
+.tags
+*.gem
