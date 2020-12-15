@@ -5,3 +5,4 @@ doc/*
 .yardoc
 .DS_Store
 .idea
+vendor
