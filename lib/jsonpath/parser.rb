@@ -7,9 +7,10 @@ class JsonPath
   class Parser
     REGEX = /\A\/(.+)\/([imxnesu]*)\z|\A%r{(.+)}([imxnesu]*)\z/
 
-    def initialize(node)
+    def initialize(node, options)
       @_current_node = node
       @_expr_map = {}
+      @options = options
     end
 
     # parse will parse an expression in the following way.
@@ -91,7 +92,11 @@ class JsonPath
       el = if elements.empty?
              @_current_node
            elsif @_current_node.is_a?(Hash)
-             @_current_node.dig(*elements)
+             if @options[:use_symbols]
+               @_current_node.dig(*elements.map(&:to_sym))
+             else
+               @_current_node.dig(*elements)
+             end
            else
              elements.inject(@_current_node, &:__send__)
            end
