@@ -970,6 +970,32 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'cate gory' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](   cate gory, author   )")
   end
 
+  def test_use_symbol_opt
+    json = {
+      store: {
+        book: [
+          {
+            category: "reference",
+            author: "Nigel Rees",
+            title: "Sayings of the Century",
+            price: 8.95
+          },
+          {
+            category: "fiction",
+            author: "Evelyn Waugh",
+            title: "Sword of Honour",
+            price: 12.99
+          }
+        ]
+      }
+    }
+    on = ->(path){ JsonPath.on(json, path, use_symbols: true) }
+    assert_equal ['reference', 'fiction'], on.("$.store.book[*].category")
+    assert_equal ['reference', 'fiction'], on.("$..category")
+    assert_equal ['reference'], on.("$.store.book[?(@['price'] == 8.95)].category")
+    assert_equal [{'category' => 'reference'}], on.("$.store.book[?(@['price'] == 8.95)](category)")
+  end
+
   def test_object_method_send
     j = {height: 5, hash: "some_hash"}.to_json
     hs = JsonPath.new "$..send"

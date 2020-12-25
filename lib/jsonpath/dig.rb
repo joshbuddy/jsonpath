@@ -22,7 +22,7 @@ class JsonPath
     def dig_one(context, k)
       case context
       when Hash
-        context[k]
+        context[@options[:use_symbols] ? k.to_sym : k]
       when Array
         context[k.to_i]
       else
@@ -35,7 +35,11 @@ class JsonPath
     def yield_if_diggable(context, k, &blk)
       if context.is_a?(Hash)
         context[k] ||= nil if @options[:default_path_leaf_to_null]
-        yield if context.key?(k)
+        if @options[:use_symbols]
+          yield if context.key?(k.to_sym)
+        else
+          yield if context.key?(k)
+        end
       elsif context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
         yield
       end
