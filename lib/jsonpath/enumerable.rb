@@ -3,6 +3,7 @@
 class JsonPath
   class Enumerable
     include ::Enumerable
+    include Dig
 
     def initialize(path, object, mode, options = {})
       @path = path.path
@@ -12,12 +13,7 @@ class JsonPath
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
-      node =
-        if key
-          context.is_a?(Hash) || context.is_a?(Array) ? context[key] : context.__send__(key)
-        else
-          context
-        end
+      node = key ? dig_one(context, key) : context
       @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
 
@@ -47,11 +43,10 @@ class JsonPath
     def filter_context(context, keys)
       case context
       when Hash
-        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
-        context.select { |k| keys.include?(k) }
+        dig_as_hash(context, keys)
       when Array
         context.each_with_object([]) do |c, memo|
-          memo << c.select { |k| keys.include?(k) }
+          memo << dig_as_hash(c, keys)
         end
       end
     end
@@ -61,10 +56,7 @@ class JsonPath
         case sub_path[0]
         when '\'', '"'
           k = sub_path[1, sub_path.size - 2]
-          if node.is_a?(Hash)
-            node[k] ||= nil if @options[:default_path_leaf_to_null]
-            each(node, k, pos + 1, &blk) if node.key?(k)
-          elsif node.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
+          yield_if_diggable(node, k) do
             each(node, k, pos + 1, &blk)
           end
         when '?'
@@ -130,7 +122,7 @@ class JsonPath
     def yield_value(blk, context, key)
       case @mode
       when nil
-        blk.call(key ? context[key] : context)
+        blk.call(key ? dig_one(context, key) : context)
       when :compact
         if key && context[key].nil?
           key.is_a?(Integer) ? context.delete_at(key) : context.delete(key)
@@ -162,12 +154,12 @@ class JsonPath
           el == '@' ? '@' : "['#{el}']"
         end.join
         begin
-          return JsonPath::Parser.new(@_current_node).parse(exp_to_eval)
+          return JsonPath::Parser.new(@_current_node, @options).parse(exp_to_eval)
         rescue StandardError
           return default
         end
       end
-      JsonPath::Parser.new(@_current_node).parse(exp)
+      JsonPath::Parser.new(@_current_node, @options).parse(exp)
     end
   end
 end

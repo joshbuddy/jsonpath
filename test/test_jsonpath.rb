@@ -149,7 +149,6 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_works_on_non_hash_with_summary
-    skip("This does not work currently")
     klass = Struct.new(:a, :b)
     object = {
       "foo" => [klass.new("some", "value")]
