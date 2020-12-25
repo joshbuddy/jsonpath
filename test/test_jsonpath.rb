@@ -130,6 +130,26 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['value'], JsonPath.new('$.b').on(object)
   end
 
+  def test_works_on_diggable
+    klass = Class.new{
+      attr_reader :h
+      def initialize(h)
+        @h = h
+      end
+      def dig(*keys)
+        @h.dig(*keys)
+      end
+    }
+
+    object = klass.new('a' => 'some', 'b' => 'value')
+    assert_equal ['value'], JsonPath.new('$.b').on(object)
+
+    object = {
+      "foo" => klass.new('a' => 'some', 'b' => 'value')
+    }
+    assert_equal ['value'], JsonPath.new('$.foo.b').on(object)
+  end
+
   def test_works_on_non_hash_with_filters
     klass = Struct.new(:a, :b)
     first_object = klass.new('some', 'value')
