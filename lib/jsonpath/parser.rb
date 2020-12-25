@@ -5,6 +5,8 @@ require 'strscan'
 class JsonPath
   # Parser parses and evaluates an expression passed to @_current_node.
   class Parser
+    include Dig
+
     REGEX = /\A\/(.+)\/([imxnesu]*)\z|\A%r{(.+)}([imxnesu]*)\z/
 
     def initialize(node, options)
@@ -92,11 +94,7 @@ class JsonPath
       el = if elements.empty?
              @_current_node
            elsif @_current_node.is_a?(Hash)
-             if @options[:use_symbols]
-               @_current_node.dig(*elements.map(&:to_sym))
-             else
-               @_current_node.dig(*elements)
-             end
+             dig(@_current_node, *elements)
            else
              elements.inject(@_current_node, &:__send__)
            end

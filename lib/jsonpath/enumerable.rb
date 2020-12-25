@@ -3,6 +3,7 @@
 class JsonPath
   class Enumerable
     include ::Enumerable
+    include Dig
 
     def initialize(path, object, mode, options = {})
       @path = path.path
@@ -12,12 +13,7 @@ class JsonPath
     end
 
     def each(context = @object, key = nil, pos = 0, &blk)
-      node =
-        if key
-          context.is_a?(Hash) || context.is_a?(Array) ? context[key] : context.__send__(key)
-        else
-          context
-        end
+      node = key ? dig_one(context, key) : context
       @_current_node = node
       return yield_value(blk, context, key) if pos == @path.size
 
@@ -55,43 +51,13 @@ class JsonPath
       end
     end
 
-    def dig_as_hash(context, keys)
-      keys.each_with_object({}) do |k, memo|
-        k, v = *dig_one(context, k)
-        memo[k] = v
-      end
-    end
-
-    def dig_one(context, k)
-      k = k.to_sym if @options[:use_symbols]
-      case context
-      when Hash, Array
-        [k, context.dig(k)]
-      else
-        [k, context.__send__(k)]
-      end
-    end
-
-    def yield_if_diggable(node, k, &blk)
-      if node.is_a?(Hash)
-        node[k] ||= nil if @options[:default_path_leaf_to_null]
-        if @options[:use_symbols]
-          yield(k.to_sym) if node.key?(k.to_sym)
-        else
-          yield(k) if node.key?(k)
-        end
-      elsif node.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
-        yield(k)
-      end
-    end
-
     def handle_wildecard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
           k = sub_path[1, sub_path.size - 2]
-          yield_if_diggable(node, k) do |actual_k|
-            each(node, actual_k, pos + 1, &blk)
+          yield_if_diggable(node, k) do
+            each(node, k, pos + 1, &blk)
           end
         when '?'
           handle_question_mark(sub_path, node, pos, &blk)
@@ -156,7 +122,7 @@ class JsonPath
     def yield_value(blk, context, key)
       case @mode
       when nil
-        blk.call(key ? context[key] : context)
+        blk.call(key ? dig_one(context, key) : context)
       when :compact
         if key && context[key].nil?
           key.is_a?(Integer) ? context.delete_at(key) : context.delete(key)

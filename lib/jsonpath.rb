@@ -3,6 +3,7 @@
 require 'strscan'
 require 'multi_json'
 require 'jsonpath/proxy'
+require 'jsonpath/dig'
 require 'jsonpath/enumerable'
 require 'jsonpath/version'
 require 'jsonpath/parser'
