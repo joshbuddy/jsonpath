@@ -138,6 +138,22 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['other value'], JsonPath.new('$[?(@.a == "next")].b').on([first_object, second_object])
   end
 
+  def test_works_on_non_hash_with_summary
+    object = {
+      "foo" => [{
+        "a" => "some",
+        "b" => "value"
+      }]
+    }
+    assert_equal [{ "b" => "value" }], JsonPath.new("$.foo[*](b)").on(object)
+
+    klass = Struct.new(:a, :b)
+    object = {
+      "foo" => [klass.new("some", "value")]
+    }
+    assert_equal [{ "b" => "value" }], JsonPath.new("$.foo[*](b)").on(object)
+  end
+
   def test_recognize_array_with_evald_index
     assert_equal [@object['store']['book'][2]], JsonPath.new('$..book[(@.length-5)]').on(@object)
   end
@@ -849,7 +865,34 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
   end
 
-  def test_selecting_multiple_keys
+  def test_selecting_multiple_keys_on_hash
+    json = '
+    {
+      "category": "reference",
+      "author": "Nigel Rees",
+      "title": "Sayings of the Century",
+      "price": 8.95
+    }
+    '.to_json
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, '$.(category,author)')
+  end
+
+  def test_selecting_multiple_keys_on_sub_hash
+    skip("Failing as the semantics of .(x,y) is unclear")
+    json = '
+    {
+      "book": {
+        "category": "reference",
+        "author": "Nigel Rees",
+        "title": "Sayings of the Century",
+        "price": 8.95
+      }
+    }
+    '.to_json
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, '$.book.(category,author)')
+  end
+
+  def test_selecting_multiple_keys_on_array
     json = '
     {
       "store": {
@@ -874,7 +917,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }, { 'category' => 'fiction', 'author' => 'Evelyn Waugh' }], JsonPath.on(json, '$.store.book[*](category,author)')
   end
 
-  def test_selecting_multiple_keys_with_filter
+  def test_selecting_multiple_keys_on_array_with_filter
     json = '
     {
       "store": {

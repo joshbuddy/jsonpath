@@ -45,15 +45,30 @@ class JsonPath
     private
 
     def filter_context(context, keys)
-      keys = keys.map(&:to_sym) if @options[:use_symbols]
       case context
       when Hash
-        # TODO: Change this to `slice(*keys)` when ruby version support is > 2.4
-        context.select { |k| keys.include?(k) }
+        dig_as_hash(context, keys)
       when Array
         context.each_with_object([]) do |c, memo|
-          memo << c.select { |k| keys.include?(k) }
+          memo << dig_as_hash(c, keys)
         end
+      end
+    end
+
+    def dig_as_hash(context, keys)
+      keys.each_with_object({}) do |k, memo|
+        k, v = *dig_one(context, k)
+        memo[k] = v
+      end
+    end
+
+    def dig_one(context, k)
+      k = k.to_sym if @options[:use_symbols]
+      case context
+      when Hash, Array
+        [k, context.dig(k)]
+      else
+        [k, context.__send__(k)]
       end
     end
 
