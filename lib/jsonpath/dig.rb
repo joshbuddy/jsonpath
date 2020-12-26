@@ -37,12 +37,19 @@ class JsonPath
     # Yields the block if context has a diggable
     # value for k
     def yield_if_diggable(context, k, &blk)
-      return if context.is_a?(Array)
-      if context.respond_to?(:dig)
-        digged = dig_one(context, k)
-        yield if !digged.nil? || @options[:default_path_leaf_to_null]
-      elsif context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
-        yield
+      case context
+      when Array
+        nil
+      when Hash
+        k = @options[:use_symbols] ? k.to_sym : k
+        return yield if context.key?(k) || @options[:default_path_leaf_to_null]
+      else
+        if context.respond_to?(:dig)
+          digged = dig_one(context, k)
+          yield if !digged.nil? || @options[:default_path_leaf_to_null]
+        elsif context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
+          yield
+        end
       end
     end
 
