@@ -63,6 +63,7 @@ class JsonPath
           handle_question_mark(sub_path, node, pos, &blk)
         else
           next if node.is_a?(Array) && node.empty?
+          next if node.nil? # when default_path_leaf_to_null is true
 
           array_args = sub_path.split(':')
           if array_args[0] == '*'
