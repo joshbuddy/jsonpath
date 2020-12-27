@@ -130,6 +130,30 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['value'], JsonPath.new('$.b').on(object)
   end
 
+  def test_works_on_object
+    klass = Class.new{
+      attr_reader :b
+      def initialize(b)
+        @b = b
+      end
+    }
+    object = klass.new("value")
+
+    assert_equal ["value"], JsonPath.new('$.b').on(object)
+  end
+
+  def test_works_on_object_can_be_disabled
+    klass = Class.new{
+      attr_reader :b
+      def initialize(b)
+        @b = b
+      end
+    }
+    object = klass.new("value")
+
+    assert_equal [], JsonPath.new('$.b', allow_send: false).on(object)
+  end
+
   def test_works_on_diggable
     klass = Class.new{
       attr_reader :h

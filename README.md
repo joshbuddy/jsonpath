@@ -114,7 +114,47 @@ enum.any?{ |c| c == 'red' }
 For more usage examples and variations on paths, please visit the tests. There
 are some more complex ones as well.
 
-### Available options
+### Querying ruby data structures
+
+If you have ruby hashes with symbolized keys as input, you
+can use `:use_symbols` to make JsonPath work fine on them too:
+
+```ruby
+book = { title: "Sayings of the Century" }
+
+JsonPath.new('$.title').on(book)
+# => []
+
+JsonPath.new('$.title', use_symbols: true).on(book)
+# => ["Sayings of the Century"]
+```
+
+JsonPath also recognizes objects responding to `dig` (introduced
+in ruby 2.3), and therefore works out of the box with Struct,
+OpenStruct, and other Hash-like structures:
+
+```ruby
+book_class = Struct.new(:title)
+book = book_class.new("Sayings of the Century")
+
+JsonPath.new('$.title').on(book)
+# => ["Sayings of the Century"]
+```
+
+JsonPath is able to query pure ruby objects and uses `__send__`
+on them. The option is enabled by default in JsonPath 1.x, but
+we encourage to enable it explicitly:
+
+```ruby
+book_class = Class.new{ attr_accessor :title }
+book = book_class.new
+book.title = "Sayings of the Century"
+
+JsonPath.new('$.title', allow_send: true).on(book)
+# => ["Sayings of the Century"]
+```
+
+### Other available options
 
 By default, JsonPath does not return null values on unexisting paths.
 This can be changed using the `:default_path_leaf_to_null` option
@@ -136,19 +176,6 @@ JsonPath.new('$..book[0]').on(json)
 
 JsonPath.new('$..book[0]', symbolize_keys: true).on(json)
 # => [{category: "reference", ...}]
-```
-
-If you have ruby hashes with symbolized keys as input, you
-can use `:use_symbols` to make JsonPath work fine on them too:
-
-```ruby
-book = { title: "Sayings of the Century" }
-
-JsonPath.new('$.title').on(book)
-# => []
-
-JsonPath.new('$.title', use_symbols: true).on(book)
-# => ["Sayings of the Century"]
 ```
 
 ### Selecting Values

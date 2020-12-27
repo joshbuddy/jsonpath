@@ -45,16 +45,27 @@ class TestJsonpathReadme < MiniTest::Unit::TestCase
     assert enum.any?{ |c| c == 'red' }
   end
 
+  def test_ruby_structures_section
+    book = { title: "Sayings of the Century" }
+    assert_equal [], JsonPath.new('$.title').on(book)
+    assert_equal ["Sayings of the Century"], JsonPath.new('$.title', use_symbols: true).on(book)
+
+    book_class = Struct.new(:title)
+    book = book_class.new("Sayings of the Century")
+    assert_equal ["Sayings of the Century"], JsonPath.new('$.title').on(book)
+
+    book_class = Class.new{ attr_accessor :title }
+    book = book_class.new
+    book.title = "Sayings of the Century"
+    assert_equal ["Sayings of the Century"], JsonPath.new('$.title', allow_send: true).on(book)
+  end
+
   def test_options_section
     assert_equal ["0-553-21311-3", "0-395-19395-8"], JsonPath.new('$..book[*].isbn').on(json)
     assert_equal [nil, nil, "0-553-21311-3", "0-395-19395-8"], JsonPath.new('$..book[*].isbn', default_path_leaf_to_null: true).on(json)
 
     assert_equal ["price", "category", "title", "author"], JsonPath.new('$..book[0]').on(json).map(&:keys).flatten.uniq
     assert_equal [:price, :category, :title, :author], JsonPath.new('$..book[0]').on(json, symbolize_keys: true).map(&:keys).flatten.uniq
-
-    book = { title: "Sayings of the Century" }
-    assert_equal [], JsonPath.new('$.title').on(book)
-    assert_equal ["Sayings of the Century"], JsonPath.new('$.title', use_symbols: true).on(book)
   end
 
   def selecting_value_section

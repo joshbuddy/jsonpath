@@ -28,7 +28,7 @@ class JsonPath
       else
         if context.respond_to?(:dig)
           context.dig(k)
-        else
+        elsif @options[:allow_send]
           context.__send__(k)
         end
       end
@@ -47,7 +47,7 @@ class JsonPath
         if context.respond_to?(:dig)
           digged = dig_one(context, k)
           yield if !digged.nil? || @options[:default_path_leaf_to_null]
-        elsif context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
+        elsif @options[:allow_send] && context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
           yield
         end
       end
