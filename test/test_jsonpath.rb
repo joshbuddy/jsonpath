@@ -130,12 +130,74 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ['value'], JsonPath.new('$.b').on(object)
   end
 
+  def test_works_on_object
+    klass = Class.new{
+      attr_reader :b
+      def initialize(b)
+        @b = b
+      end
+    }
+    object = klass.new("value")
+
+    assert_equal ["value"], JsonPath.new('$.b').on(object)
+  end
+
+  def test_works_on_object_can_be_disabled
+    klass = Class.new{
+      attr_reader :b
+      def initialize(b)
+        @b = b
+      end
+    }
+    object = klass.new("value")
+
+    assert_equal [], JsonPath.new('$.b', allow_send: false).on(object)
+  end
+
+  def test_works_on_diggable
+    klass = Class.new{
+      attr_reader :h
+      def initialize(h)
+        @h = h
+      end
+      def dig(*keys)
+        @h.dig(*keys)
+      end
+    }
+
+    object = klass.new('a' => 'some', 'b' => 'value')
+    assert_equal ['value'], JsonPath.new('$.b').on(object)
+
+    object = {
+      "foo" => klass.new('a' => 'some', 'b' => 'value')
+    }
+    assert_equal ['value'], JsonPath.new('$.foo.b').on(object)
+  end
+
   def test_works_on_non_hash_with_filters
     klass = Struct.new(:a, :b)
     first_object = klass.new('some', 'value')
     second_object = klass.new('next', 'other value')
 
     assert_equal ['other value'], JsonPath.new('$[?(@.a == "next")].b').on([first_object, second_object])
+  end
+
+  def test_works_on_hash_with_summary
+    object = {
+      "foo" => [{
+        "a" => "some",
+        "b" => "value"
+      }]
+    }
+    assert_equal [{ "b" => "value" }], JsonPath.new("$.foo[*](b)").on(object)
+  end
+
+  def test_works_on_non_hash_with_summary
+    klass = Struct.new(:a, :b)
+    object = {
+      "foo" => [klass.new("some", "value")]
+    }
+    assert_equal [{ "b" => "value" }], JsonPath.new("$.foo[*](b)").on(object)
   end
 
   def test_recognize_array_with_evald_index
@@ -849,7 +911,34 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [], JsonPath.on(json, "$.phoneNumbers[?(@[0].type == 'home')]")
   end
 
-  def test_selecting_multiple_keys
+  def test_selecting_multiple_keys_on_hash
+    json = '
+    {
+      "category": "reference",
+      "author": "Nigel Rees",
+      "title": "Sayings of the Century",
+      "price": 8.95
+    }
+    '.to_json
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, '$.(category,author)')
+  end
+
+  def test_selecting_multiple_keys_on_sub_hash
+    skip("Failing as the semantics of .(x,y) is unclear")
+    json = '
+    {
+      "book": {
+        "category": "reference",
+        "author": "Nigel Rees",
+        "title": "Sayings of the Century",
+        "price": 8.95
+      }
+    }
+    '.to_json
+    assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, '$.book.(category,author)')
+  end
+
+  def test_selecting_multiple_keys_on_array
     json = '
     {
       "store": {
@@ -874,7 +963,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }, { 'category' => 'fiction', 'author' => 'Evelyn Waugh' }], JsonPath.on(json, '$.store.book[*](category,author)')
   end
 
-  def test_selecting_multiple_keys_with_filter
+  def test_selecting_multiple_keys_on_array_with_filter
     json = '
     {
       "store": {
@@ -925,6 +1014,32 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'cate gory' => 'reference', 'author' => 'Nigel Rees' }], JsonPath.on(json, "$.store.book[?(@['price'] == 8.95)](   cate gory, author   )")
   end
 
+  def test_use_symbol_opt
+    json = {
+      store: {
+        book: [
+          {
+            category: "reference",
+            author: "Nigel Rees",
+            title: "Sayings of the Century",
+            price: 8.95
+          },
+          {
+            category: "fiction",
+            author: "Evelyn Waugh",
+            title: "Sword of Honour",
+            price: 12.99
+          }
+        ]
+      }
+    }
+    on = ->(path){ JsonPath.on(json, path, use_symbols: true) }
+    assert_equal ['reference', 'fiction'], on.("$.store.book[*].category")
+    assert_equal ['reference', 'fiction'], on.("$..category")
+    assert_equal ['reference'], on.("$.store.book[?(@['price'] == 8.95)].category")
+    assert_equal [{'category' => 'reference'}], on.("$.store.book[?(@['price'] == 8.95)](category)")
+  end
+
   def test_object_method_send
     j = {height: 5, hash: "some_hash"}.to_json
     hs = JsonPath.new "$..send"
@@ -943,6 +1058,44 @@ class TestJsonpath < MiniTest::Unit::TestCase
       '1': 'foo'
     }
     assert_equal ['foo'], JsonPath.new('$.1').on(data.to_json)
+  end
+
+  def test_behavior_on_null_and_missing
+    data = {
+      "foo" => nil,
+      "bar" => {
+        "baz" => nil
+      },
+      "bars" => [
+        { "foo" => 12 },
+        { "foo" => nil },
+        { }
+      ]
+    }
+    assert_equal [nil], JsonPath.new('$.foo').on(data)
+    assert_equal [nil], JsonPath.new('$.bar.baz').on(data)
+    assert_equal [], JsonPath.new('$.baz').on(data)
+    assert_equal [], JsonPath.new('$.bar.foo').on(data)
+    assert_equal [12, nil], JsonPath.new('$.bars[*].foo').on(data)
+  end
+
+  def test_default_path_leaf_to_null_opt
+    data = {
+      "foo" => nil,
+      "bar" => {
+        "baz" => nil
+      },
+      "bars" => [
+        { "foo" => 12 },
+        { "foo" => nil },
+        { }
+      ]
+    }
+    assert_equal [nil], JsonPath.new('$.foo', default_path_leaf_to_null: true).on(data)
+    assert_equal [nil], JsonPath.new('$.bar.baz', default_path_leaf_to_null: true).on(data)
+    assert_equal [nil], JsonPath.new('$.baz', default_path_leaf_to_null: true).on(data)
+    assert_equal [nil], JsonPath.new('$.bar.foo', default_path_leaf_to_null: true).on(data)
+    assert_equal [12, nil, nil], JsonPath.new('$.bars[*].foo', default_path_leaf_to_null: true).on(data)
   end
 
   def example_object

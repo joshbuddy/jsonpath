@@ -3,6 +3,7 @@
 require 'strscan'
 require 'multi_json'
 require 'jsonpath/proxy'
+require 'jsonpath/dig'
 require 'jsonpath/enumerable'
 require 'jsonpath/version'
 require 'jsonpath/parser'
@@ -12,10 +13,17 @@ require 'jsonpath/parser'
 class JsonPath
   PATH_ALL = '$..*'
 
+  DEFAULT_OPTIONS = {
+    :default_path_leaf_to_null => false,
+    :symbolize_keys => false,
+    :use_symbols => false,
+    :allow_send => true
+  }
+
   attr_accessor :path
 
   def initialize(path, opts = {})
-    @opts = opts
+    @opts = DEFAULT_OPTIONS.merge(opts)
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
