@@ -1153,7 +1153,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     } }
   end
   
-  def test_fetch_all_paths
+  def test_fetch_all_path
     data = {
       "foo" => nil,
       "bar" => {
