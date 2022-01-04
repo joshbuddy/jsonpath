@@ -52,7 +52,7 @@ class JsonPath
 
     def _remove(obj)
       obj.each do |o|
-        if o.is_a?(Hash) || o.is_a?(Array)
+        if o.respond_to?(:to_hash) || o.respond_to?(:to_ary)
           _remove(o)
           o.delete({})
         end

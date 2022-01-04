@@ -31,9 +31,10 @@ class JsonPath
       end
 
       if pos > 0 && @path[pos - 1] == '..' || (@path[pos - 1] == '*' && @path[pos] != '..')
-        case node
-        when Hash  then node.each { |k, _| each(node, k, pos, &blk) }
-        when Array then node.each_with_index { |_, i| each(node, i, pos, &blk) }
+        if node.respond_to?(:to_hash)
+          node.to_hash.each { |k, _| each(node, k, pos, &blk) }
+        elsif node.respond_to?(:to_ary)
+          node.to_ary.each_with_index { |_, i| each(node, i, pos, &blk) }
         end
       end
     end
@@ -41,11 +42,10 @@ class JsonPath
     private
 
     def filter_context(context, keys)
-      case context
-      when Hash
+      if context.respond_to?(:to_hash)
         dig_as_hash(context, keys)
-      when Array
-        context.each_with_object([]) do |c, memo|
+      elsif context.respond_to?(:to_ary)
+        context.to_ary.each_with_object([]) do |c, memo|
           memo << dig_as_hash(c, keys)
         end
       end
@@ -62,7 +62,7 @@ class JsonPath
         when '?'
           handle_question_mark(sub_path, node, pos, &blk)
         else
-          next if node.is_a?(Array) && node.empty?
+          next if node.respond_to?(:to_ary) && node.empty?
           next if node.nil? # when default_path_leaf_to_null is true
 
           array_args = sub_path.split(':')
@@ -103,15 +103,15 @@ class JsonPath
     end
 
     def handle_question_mark(sub_path, node, pos, &blk)
-      case node
-      when Array
-        node.size.times do |index|
-          @_current_node = node[index]
+      if node.respond_to?(:to_ary)
+        node_ary = node.to_ary
+        node_ary.size.times do |index|
+          @_current_node = node_ary[index]
           if process_function_or_literal(sub_path[1, sub_path.size - 1])
             each(@_current_node, nil, pos + 1, &blk)
           end
         end
-      when Hash
+      elsif node.respond_to?(:to_hash)
         if process_function_or_literal(sub_path[1, sub_path.size - 1])
           each(@_current_node, nil, pos + 1, &blk)
         end

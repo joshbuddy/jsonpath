@@ -58,7 +58,7 @@ class JsonPath
         next if i.empty?
 
         index = Integer(i[0])
-        raise ArgumentError, 'Node does not appear to be an array.' unless @_current_node.is_a?(Array)
+        raise ArgumentError, 'Node does not appear to be an array.' unless @_current_node.respond_to?(:to_ary)
         raise ArgumentError, "Index out of bounds for nested array. Index: #{index}" if @_current_node.size < index
 
         @_current_node = @_current_node[index]
@@ -93,7 +93,7 @@ class JsonPath
 
       el = if elements.empty?
              @_current_node
-           elsif @_current_node.is_a?(Hash)
+           elsif @_current_node.respond_to?(:to_hash)
              dig(@_current_node, *elements)
            else
              elements.inject(@_current_node, &:__send__)
