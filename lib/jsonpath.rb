@@ -17,7 +17,8 @@ class JsonPath
     :default_path_leaf_to_null => false,
     :symbolize_keys => false,
     :use_symbols => false,
-    :allow_send => true
+    :allow_send => true,
+    :max_nesting => 100
   }
 
   attr_accessor :path
@@ -107,8 +108,8 @@ class JsonPath
 
   private
 
-  def self.process_object(obj_or_str)
-    obj_or_str.is_a?(String) ? MultiJson.decode(obj_or_str) : obj_or_str
+  def self.process_object(obj_or_str, opts = {})
+    obj_or_str.is_a?(String) ? MultiJson.decode(obj_or_str, max_nesting: opts[:max_nesting]) : obj_or_str
   end
 
   def deep_clone
