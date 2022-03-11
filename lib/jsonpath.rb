@@ -93,7 +93,7 @@ class JsonPath
   end
 
   def enum_on(obj_or_str, mode = nil)
-    JsonPath::Enumerable.new(self, self.class.process_object(obj_or_str), mode,
+    JsonPath::Enumerable.new(self, self.class.process_object(obj_or_str, @opts), mode,
                              @opts)
   end
   alias [] enum_on
