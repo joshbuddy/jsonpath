@@ -159,9 +159,11 @@ class JsonPath
       res = bool_or_exp(top.shift)
       top.each_with_index do |item, index|
         if item == '&&'
-          res &&= top[index + 1]
+          next_value = bool_or_exp(top[index + 1])
+          res &&= next_value
         elsif item == '||'
-          res ||= top[index + 1]
+          next_value = bool_or_exp(top[index + 1])
+          res ||= next_value
         end
       end
 

@@ -80,10 +80,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_or_operator
     assert_equal [@object['store']['book'][1], @object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] == 13 || @['price'] == 23)]").on(@object)
+    result = ["Sayings of the Century", "Sword of Honour", "Moby Dick", "The Lord of the Rings"]
+    assert_equal result, JsonPath.new("$..book[?(@.price==13 || @.price==9 || @.price==23)].title").on(@object)
+    assert_equal result, JsonPath.new("$..book[?(@.price==9 || @.price==23 || @.price==13)].title").on(@object)
+    assert_equal result, JsonPath.new("$..book[?(@.price==23 || @.price==13 || @.price==9)].title").on(@object)
   end
 
   def test_and_operator
     assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.category==fiction && @.title==no_match)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.title==no_match && @.category==fiction && @.price==13)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.title==no_match && @.category==fiction)]").on(@object)
   end
 
   def test_and_operator_with_more_results
