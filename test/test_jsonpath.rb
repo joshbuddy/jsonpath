@@ -1204,4 +1204,19 @@ class TestJsonpath < MiniTest::Unit::TestCase
       '_links' => { 'self' => {} }
     } }
   end
+  
+  def test_fetch_all_path
+    data = {
+      "foo" => nil,
+      "bar" => {
+        "baz" => nil
+      },
+      "bars" => [
+        { "foo" => 12 },
+        { "foo" => nil },
+        { }
+      ]
+    }
+    assert_equal ["$", "$.foo", "$.bar", "$.bar.baz", "$.bars", "$.bars[0].foo", "$.bars[0]", "$.bars[1].foo", "$.bars[1]", "$.bars[2]"], JsonPath.fetch_all_path(data)
+  end
 end

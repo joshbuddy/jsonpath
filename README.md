@@ -253,6 +253,42 @@ o = JsonPath.for(json).
 # => {"candy" => "big turks"}
 ```
 
+### Fetch all paths
+
+To fetch all possible paths in given json, you can use `fetch_all_paths` method.
+
+data:
+
+```bash
+{
+    "store": {
+        "book": [
+            {
+                "category": "reference",
+                "author": "Nigel Rees"
+            },
+            {
+                "category": "fiction",
+                "author": "Evelyn Waugh"
+            }
+        ]
+}
+```
+
+... and this query:
+
+```ruby
+JsonPath.fetch_all_path(data)
+```
+
+... the result will be:
+
+```bash
+["$", "$.store", "$.store.book", "$.store.book[0].category", "$.store.book[0].author", "$.store.book[0]", "$.store.book[1].category", "$.store.book[1].author", "$.store.book[1]"]
+```
+
+
+
 # Contributions
 
 Please feel free to submit an Issue or a Pull Request any time you feel like
