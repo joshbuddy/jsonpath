@@ -573,6 +573,25 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'isTrue' => true, 'name' => 'testname1' }], JsonPath.new('$.data[?(@.isTrue)]').on(data)
   end
 
+  def test_and_operator_with_boolean_parameter_value
+    data = {
+      'data' => [{
+        'hasProperty1' => true,
+        'hasProperty2' => false,
+        'name' => 'testname1'
+      }, {
+        'hasProperty1' => false,
+        'hasProperty2' => true,
+        'name' => 'testname2'
+      }, {
+        'hasProperty1' => true,
+        'hasProperty2' => true,
+        'name' => 'testname3'
+      }]
+    }
+    assert_equal ['testname3'], JsonPath.new('$.data[?(@.hasProperty1 && @.hasProperty2)].name').on(data)
+  end
+
   def test_regex_simple
     assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ /asdf/)]').on(@object)
   end
