@@ -1124,6 +1124,32 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [12, nil, nil], JsonPath.new('$.bars[*].foo', default_path_leaf_to_null: true).on(data)
   end
 
+  def test_raise_max_nesting_error
+    json = {
+      a: {
+        b: {
+          c: {
+          }
+        }
+      }
+    }.to_json
+
+    assert_raises(MultiJson::ParseError) { JsonPath.new('$.a', max_nesting: 1).on(json) }
+  end
+
+  def test_with_max_nesting_false
+    json = {
+      a: {
+        b: {
+          c: {
+          }
+        }
+      }
+    }.to_json
+
+    assert_equal [{}], JsonPath.new('$.a.b.c', max_nesting: false).on(json)
+  end
+
   def example_object
     { 'store' => {
       'book' => [
