@@ -70,12 +70,20 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] == 9)]").on(@object)
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
-    assert_equal [
-      @object['store']['book'][0],
-      @object['store']['book'][4],
-      @object['store']['book'][5],
-      @object['store']['book'][6]
-    ], JsonPath.new("$..book[?(@['category'] != 'fiction')]").on(@object)
+  end
+
+  def test_not_equals_operator
+    expected =
+      [
+        @object['store']['book'][0],
+        @object['store']['book'][4],
+        @object['store']['book'][5],
+        @object['store']['book'][6]
+      ]
+    assert_equal(expected, JsonPath.new("$..book[?(@['category'] != 'fiction')]").on(@object))
+    assert_equal(expected, JsonPath.new("$..book[?(@['category']!=fiction)]").on(@object))
+    assert_equal(expected, JsonPath.new("$..book[?(@.category!=fiction)]").on(@object))
+    assert_equal(expected, JsonPath.new("$..book[?(@.category != 'fiction')]").on(@object))
   end
 
   def test_or_operator
@@ -86,15 +94,36 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal result, JsonPath.new("$..book[?(@.price==23 || @.price==13 || @.price==9)].title").on(@object)
   end
 
-  def test_and_operator
-    assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
-    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.category==fiction && @.title==no_match)]").on(@object)
-    assert_equal [], JsonPath.new("$..book[?(@.title==no_match && @.category==fiction && @.price==13)]").on(@object)
-    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.title==no_match && @.category==fiction)]").on(@object)
+  def test_or_operator_with_not_equals
+    # Should be the same regardless of key style ( @.key vs @['key'] )
+    result = ['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien', 'Lukyanenko']
+    assert_equal result, JsonPath.new("$..book[?(@['title']=='Osennie Vizity' || @['author']!='Lukyanenko')].author").on(@object)
+    assert_equal result, JsonPath.new("$..book[?(@.title=='Osennie Vizity' || @.author != Lukyanenko )].author").on(@object)
+    assert_equal result, JsonPath.new("$..book[?(@.title=='Osennie Vizity' || @.author!=Lukyanenko )].author").on(@object)
   end
 
-  def test_and_operator_with_more_results
-    assert_equal [@object['store']['book'][1]], JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
+  def test_and_operator
+    assert_equal [], JsonPath.new("$..book[?(@['price'] == 13 && @['price'] == 23)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.price>=13 && @.category==fiction && @.title==no_match)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.title==no_match && @.category==fiction && @.price==13)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.title==no_match && @.category==fiction)]").on(@object)
+    assert_equal [], JsonPath.new("$..book[?(@.price==13 && @.bad_key_name==true && @.category==fiction)]").on(@object)
+
+    expected = [@object['store']['book'][1]]
+    assert_equal expected, JsonPath.new("$..book[?(@['price'] < 23 && @['price'] > 9)]").on(@object)
+    assert_equal expected, JsonPath.new("$..book[?(@.price < 23 && @.price > 9)]").on(@object)
+
+    expected = ['Sword of Honour', 'The Lord of the Rings']
+    assert_equal expected, JsonPath.new("$..book[?(@.price>=13 && @.category==fiction)].title").on(@object)
+    assert_equal ['The Lord of the Rings'], JsonPath.new("$..book[?(@.category==fiction && @.isbn && @.price>9)].title").on(@object)
+    assert_equal ['Sayings of the Century'], JsonPath.new("$..book[?(@['price'] == 9 && @.author=='Nigel Rees')].title").on(@object)
+    assert_equal ['Sayings of the Century'], JsonPath.new("$..book[?(@['price'] == 9 && @.tags..asdf)].title").on(@object)
+  end
+
+  def test_and_operator_with_not_equals
+    expected = ['Nigel Rees']
+    assert_equal expected, JsonPath.new("$..book[?(@['price']==9 && @['category']!=fiction)].author").on(@object)
+    assert_equal expected, JsonPath.new("$..book[?(@.price==9 && @.category!=fiction)].author").on(@object)
   end
 
   def test_nested_grouping
@@ -577,7 +606,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
         'name' => 'testname2'
       }]
     }
-    assert_equal [{ 'isTrue' => true, 'name' => 'testname1' }], JsonPath.new('$.data[?(@.isTrue)]').on(data)
+
+    # These queries should be equivalent
+    expected = [{ 'isTrue' => true, 'name' => 'testname1' }]
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue)]').on(data)
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue==true)]').on(data)
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue == true)]').on(data)
+
+    # These queries should be equivalent
+    expected = [{ 'isTrue' => false, 'name' => 'testname2' }]
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue != true)]').on(data)
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue!=true)]').on(data)
+    assert_equal expected, JsonPath.new('$.data[?(@.isTrue==false)]').on(data)
   end
 
   def test_and_operator_with_boolean_parameter_value
@@ -601,6 +641,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_regex_simple
     assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@ =~ /asdf/)]').on(@object)
+    assert_equal %w[asdf asdf2], JsonPath.new('$.store.book..tags[?(@=~/asdf/)]').on(@object)
   end
 
   def test_regex_simple_miss
