@@ -67,6 +67,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_recognize_filters
     assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new("$..book[?(@['isbn'])]").on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][1], @object['store']['book'][4], @object['store']['book'][5], @object['store']['book'][6]], JsonPath.new("$..book[?(!@['isbn'])]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] < 10)]").on(@object)
     assert_equal [@object['store']['book'][0], @object['store']['book'][2]], JsonPath.new("$..book[?(@['price'] == 9)]").on(@object)
     assert_equal [@object['store']['book'][3]], JsonPath.new("$..book[?(@['price'] > 20)]").on(@object)
@@ -157,6 +158,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
 
   def test_recognized_dot_notation_in_filters
     assert_equal [@object['store']['book'][2], @object['store']['book'][3]], JsonPath.new('$..book[?(@.isbn)]').on(@object)
+    assert_equal [@object['store']['book'][0], @object['store']['book'][1], @object['store']['book'][4], @object['store']['book'][5], @object['store']['book'][6]], JsonPath.new("$..book[?(!@.isbn)]").on(@object)
   end
 
   def test_works_on_non_hash

@@ -99,6 +99,7 @@ class JsonPath
              elements.inject(@_current_node, &:__send__)
            end
 
+      return !el if operator&.strip == '!' && operand.nil?
       return (el ? true : false) if el.nil? || operator.nil?
 
       el = Float(el) rescue el
