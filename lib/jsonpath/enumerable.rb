@@ -64,6 +64,7 @@ class JsonPath
         else
           next if node.is_a?(Array) && node.empty?
           next if node.nil? # when default_path_leaf_to_null is true
+          next if node.size.zero?
 
           array_args = sub_path.split(':')
           if array_args[0] == '*'
@@ -81,6 +82,7 @@ class JsonPath
             next unless end_idx
             next if start_idx == end_idx && start_idx >= node.size
           end
+
           start_idx %= node.size
           end_idx %= node.size
           step = process_function_or_literal(array_args[2], 1)
