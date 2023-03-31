@@ -44,7 +44,7 @@ class JsonPath
         nil
       elsif (token = scanner.scan(/[><=] \d+/))
         @path.last << token
-      elsif (token = scanner.scan(/./))
+      elsif (token = scanner.scan(/./m))
         begin
           @path.last << token
         rescue RuntimeError
