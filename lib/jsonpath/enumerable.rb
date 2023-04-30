@@ -21,7 +21,11 @@ class JsonPath
       when '*', '..', '@'
         each(context, key, pos + 1, &blk)
       when '$'
-        each(context, key, pos + 1, &blk) if node == @object
+        if node == @object
+          each(context, key, pos + 1, &blk)
+        else
+          handle_wildecard(node, "['#{expr}']", context, key, pos, &blk)
+        end
       when /^\[(.*)\]$/
         handle_wildecard(node, expr, context, key, pos, &blk)
       when /\(.*\)/

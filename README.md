@@ -255,7 +255,7 @@ o = JsonPath.for(json).
 
 ### Fetch all paths
 
-To fetch all possible paths in given json, you can use `fetch_all_paths` method.
+To fetch all possible paths in given json, you can use `fetch_all_path` method.
 
 data:
 
