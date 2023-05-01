@@ -1260,4 +1260,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }
     assert_equal ["$", "$.foo", "$.bar", "$.bar.baz", "$.bars", "$.bars[0].foo", "$.bars[0]", "$.bars[1].foo", "$.bars[1]", "$.bars[2]"], JsonPath.fetch_all_path(data)
   end
+
+
+  def test_extractore_with_dollar_key
+    json = {"test" => {"$" =>"success", "a" => "123"}}
+    assert_equal ["success"],  JsonPath.on(json, "$.test.$")
+    assert_equal ["123"],  JsonPath.on(json, "$.test.a")
+  end
 end
