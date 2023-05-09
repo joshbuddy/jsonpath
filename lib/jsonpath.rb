@@ -44,12 +44,10 @@ class JsonPath
         nil
       elsif (token = scanner.scan(/[><=] \d+/))
         @path.last << token
-      elsif (token = scanner.scan(/./m))
-        begin
-          @path.last << token
-        rescue RuntimeError
-          raise ArgumentError, "character '#{token}' not supported in query"
-        end
+      elsif (token = scanner.scan(/./))
+        @path.last << token
+      else
+        raise ArgumentError, "character '#{scanner.peek(1)}' not supported in query"
       end
     end
   end
