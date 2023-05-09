@@ -24,10 +24,10 @@ class JsonPath
         if node == @object
           each(context, key, pos + 1, &blk)
         else
-          handle_wildecard(node, "['#{expr}']", context, key, pos, &blk)
+          handle_wildcard(node, "['#{expr}']", context, key, pos, &blk)
         end
       when /^\[(.*)\]$/
-        handle_wildecard(node, expr, context, key, pos, &blk)
+        handle_wildcard(node, expr, context, key, pos, &blk)
       when /\(.*\)/
         keys = expr.gsub(/[()]/, '').split(',').map(&:strip)
         new_context = filter_context(context, keys)
@@ -55,7 +55,7 @@ class JsonPath
       end
     end
 
-    def handle_wildecard(node, expr, _context, _key, pos, &blk)
+    def handle_wildcard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
