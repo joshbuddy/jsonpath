@@ -1178,6 +1178,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_raises(MultiJson::ParseError) { JsonPath.new('$.a', max_nesting: 1).on(json) }
   end
 
+  def test_linefeed_in_path_error
+    assert_raises(ArgumentError) { JsonPath.new("$.store\n.book") }
+  end
+
   def test_with_max_nesting_false
     json = {
       a: {
