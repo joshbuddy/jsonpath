@@ -163,7 +163,6 @@ class JsonPath
           return default
         end
       end
-      JsonPath::Parser.new(@_current_node, @options).parse(exp)
     end
   end
 end
