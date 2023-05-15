@@ -155,7 +155,7 @@ class JsonPath
       return nil unless @_current_node
 
       identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      if !identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)
+      if (!identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)) || identifiers.nil?
         exp_to_eval = exp.dup
         begin
           return JsonPath::Parser.new(@_current_node, @options).parse(exp_to_eval)
