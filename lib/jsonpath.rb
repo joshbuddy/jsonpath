@@ -26,7 +26,7 @@ class JsonPath
 
   def initialize(path, opts = {})
     @opts = DEFAULT_OPTIONS.merge(opts)
-    @opts[:max_nesting] = false if @opts[:max_nesting] > MAX_NESTING_ALLOWED
+    set_max_nesting
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
@@ -147,5 +147,10 @@ class JsonPath
 
   def deep_clone
     Marshal.load Marshal.dump(self)
+  end
+
+  def set_max_nesting
+    return unless @opts[:max_nesting].is_a?(Integer) && @opts[:max_nesting] > MAX_NESTING_ALLOWED
+    @opts[:max_nesting] = false
   end
 end

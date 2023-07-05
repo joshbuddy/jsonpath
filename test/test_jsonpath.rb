@@ -1210,6 +1210,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal false, json_obj.instance_variable_get(:@opts)[:max_nesting]
   end
 
+  def test_initialize_without_max_nesting_exceeding_limit
+    json_obj = JsonPath.new('$.a.b.c', max_nesting: 90)
+    assert_equal 90, json_obj.instance_variable_get(:@opts)[:max_nesting]
+  end
+
+  def test_initialize_with_max_nesting_false_limit
+    json_obj = JsonPath.new('$.a.b.c', max_nesting: false)
+    assert_equal false, json_obj.instance_variable_get(:@opts)[:max_nesting]
+  end
+
   def example_object
     { 'store' => {
       'book' => [
