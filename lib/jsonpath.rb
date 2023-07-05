@@ -12,20 +12,21 @@ require 'jsonpath/parser'
 # into a token array.
 class JsonPath
   PATH_ALL = '$..*'
+  MAX_NESTING_ALLOWED = 100
 
   DEFAULT_OPTIONS = {
     :default_path_leaf_to_null => false,
     :symbolize_keys => false,
     :use_symbols => false,
     :allow_send => true,
-    :max_nesting => 100
+    :max_nesting => MAX_NESTING_ALLOWED
   }
 
   attr_accessor :path
 
   def initialize(path, opts = {})
     @opts = DEFAULT_OPTIONS.merge(opts)
-    @opts[:max_nesting] = false if @opts[:max_nesting] > 100
+    @opts[:max_nesting] = false if @opts[:max_nesting] > MAX_NESTING_ALLOWED
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
