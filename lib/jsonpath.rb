@@ -25,6 +25,7 @@ class JsonPath
 
   def initialize(path, opts = {})
     @opts = DEFAULT_OPTIONS.merge(opts)
+    @opts[:max_nesting] = false if @opts[:max_nesting] > 100
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
