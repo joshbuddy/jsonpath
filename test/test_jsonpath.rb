@@ -245,7 +245,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 57, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 58, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -473,6 +473,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_support_underscore_in_member_names
     assert_equal [@object['store']['_links']],
                  JsonPath.new('$.store._links').on(@object)
+  end
+
+  def test_support_for_umlauts_in_member_names
+    assert_equal [@object['store']['Übermorgen']],
+                 JsonPath.new('$.store.Übermorgen').on(@object)
   end
 
   def test_dig_return_string
@@ -1246,10 +1251,11 @@ class TestJsonpath < MiniTest::Unit::TestCase
       },
       '@id' => 'http://example.org/store/42',
       '$meta-data' => 'whatevs',
+      'Übermorgen' => 'The day after tomorrow',
       '_links' => { 'self' => {} }
     } }
   end
-  
+
   def test_fetch_all_path
     data = {
       "foo" => nil,
