@@ -12,19 +12,21 @@ require 'jsonpath/parser'
 # into a token array.
 class JsonPath
   PATH_ALL = '$..*'
+  MAX_NESTING_ALLOWED = 100
 
   DEFAULT_OPTIONS = {
     :default_path_leaf_to_null => false,
     :symbolize_keys => false,
     :use_symbols => false,
     :allow_send => true,
-    :max_nesting => 100
+    :max_nesting => MAX_NESTING_ALLOWED
   }
 
   attr_accessor :path
 
   def initialize(path, opts = {})
     @opts = DEFAULT_OPTIONS.merge(opts)
+    set_max_nesting
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
@@ -145,5 +147,10 @@ class JsonPath
 
   def deep_clone
     Marshal.load Marshal.dump(self)
+  end
+
+  def set_max_nesting
+    return unless @opts[:max_nesting].is_a?(Integer) && @opts[:max_nesting] > MAX_NESTING_ALLOWED
+    @opts[:max_nesting] = false
   end
 end
