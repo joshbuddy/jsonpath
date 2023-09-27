@@ -32,7 +32,7 @@ class JsonPath
     until scanner.eos?
       if (token = scanner.scan(/\$\B|@\B|\*|\.\./))
         @path << token
-      elsif (token = scanner.scan(/[$@a-zA-Z0-9:{}_-]+/))
+      elsif (token = scanner.scan(/[$@\p{Alnum}:{}_ -]+/))
         @path << "['#{token}']"
       elsif (token = scanner.scan(/'(.*?)'/))
         @path << "[#{token}]"
@@ -87,7 +87,7 @@ class JsonPath
     end
     a
   end
-  
+
   def self.fetch_all_path(obj)
     all_paths = ['$']
     find_path(obj, '$', all_paths, obj.class == Array)
