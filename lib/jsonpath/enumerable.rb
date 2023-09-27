@@ -154,8 +154,9 @@ class JsonPath
       return Integer(exp) if exp[0] != '('
       return nil unless @_current_node
 
-      identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      if !identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)
+      identifiers = /@?(((?<!\d)\.(?!\d)(\w+))|\['(.*?)'\])+/.match(exp)
+      # to filter arrays with known/unknown name.
+      if (!identifiers.nil? && !(@_current_node.methods.include?(identifiers[2]&.to_sym) || @_current_node.methods.include?(identifiers[4]&.to_sym)))
         exp_to_eval = exp.dup
         begin
           return JsonPath::Parser.new(@_current_node, @options).parse(exp_to_eval)
