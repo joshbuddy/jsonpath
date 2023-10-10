@@ -80,7 +80,7 @@ class JsonPath
 
   def on(obj_or_str, opts = {})
     a = enum_on(obj_or_str).to_a
-    if opts[:symbolize_keys]
+    if symbolize_keys?(opts)
       a.map! do |e|
         e.each_with_object({}) { |(k, v), memo| memo[k.to_sym] = v; }
       end
@@ -152,5 +152,9 @@ class JsonPath
   def set_max_nesting
     return unless @opts[:max_nesting].is_a?(Integer) && @opts[:max_nesting] > MAX_NESTING_ALLOWED
     @opts[:max_nesting] = false
+  end
+
+  def symbolize_keys?(opts)
+    opts.fetch(:symbolize_keys, @opts&.dig(:symbolize_keys))
   end
 end
