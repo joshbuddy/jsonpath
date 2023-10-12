@@ -1312,4 +1312,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal ["success"],  JsonPath.on(json, "$.test.$")
     assert_equal ["123"],  JsonPath.on(json, "$.test.a")
   end
+
+  def test_symbolize_key
+    data = { "store" => { "book" => [{"category" => "reference"}]}}
+    assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]', symbolize_keys: true).on(data)
+    assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]').on(data, symbolize_keys: true)
+  end
 end
