@@ -247,7 +247,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
   end
 
   def test_counting
-    assert_equal 57, JsonPath.new('$..*').on(@object).to_a.size
+    assert_equal 59, JsonPath.new('$..*').on(@object).to_a.size
   end
 
   def test_space_in_path
@@ -475,6 +475,16 @@ class TestJsonpath < MiniTest::Unit::TestCase
   def test_support_underscore_in_member_names
     assert_equal [@object['store']['_links']],
                  JsonPath.new('$.store._links').on(@object)
+  end
+
+  def test_support_for_umlauts_in_member_names
+    assert_equal [@object['store']['Übermorgen']],
+                 JsonPath.new('$.store.Übermorgen').on(@object)
+  end
+
+  def test_support_for_spaces_in_member_name
+    assert_equal [@object['store']['Title Case']],
+                 JsonPath.new('$.store.Title Case').on(@object)
   end
 
   def test_dig_return_string
@@ -887,13 +897,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
     path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville') && (@['price'] == 33 || @['price'] == 9))]"
     assert_equal [@object['store']['book'][2]], JsonPath.new(path).on(@object)
   end
-
-  def test_complex_nested_grouping_unmatched_parent
-    path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville' && (@['price'] == 33 || @['price'] == 9))]"
-    err = assert_raises(ArgumentError, 'should have raised an exception') { JsonPath.new(path).on(@object) }
-    assert_match(/unmatched parenthesis in expression: \(\(false \|\| false && \(false \|\| true\)\)/, err.message)
+  
+  def test_nested_with_unknown_key
+    path = "$..[?(@.price == 9 || @.price == 33)].title"
+    assert_equal ["Sayings of the Century", "Moby Dick", "Sayings of the Century", "Moby Dick"], JsonPath.new(path).on(@object)
   end
 
+  def test_nested_with_unknown_key_filtered_array
+    path = "$..[?(@['price'] == 9 || @['price'] == 33)].title"
+    assert_equal ["Sayings of the Century", "Moby Dick", "Sayings of the Century", "Moby Dick"], JsonPath.new(path).on(@object)
+  end
+  
   def test_runtime_error_frozen_string
     skip('in ruby version below 2.2.0 this error is not raised') if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.0') || Gem::Version.new(RUBY_VERSION) > Gem::Version::new('2.6')
     json = '
@@ -1180,6 +1194,10 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_raises(MultiJson::ParseError) { JsonPath.new('$.a', max_nesting: 1).on(json) }
   end
 
+  def test_linefeed_in_path_error
+    assert_raises(ArgumentError) { JsonPath.new("$.store\n.book") }
+  end
+
   def test_with_max_nesting_false
     json = {
       a: {
@@ -1191,6 +1209,31 @@ class TestJsonpath < MiniTest::Unit::TestCase
     }.to_json
 
     assert_equal [{}], JsonPath.new('$.a.b.c', max_nesting: false).on(json)
+  end
+
+  def test_initialize_with_max_nesting_exceeding_limit
+    json = {
+      a: {
+        b: {
+          c: {
+          }
+        }
+      }
+    }.to_json
+
+    json_obj = JsonPath.new('$.a.b.c', max_nesting: 105)
+    assert_equal [{}], json_obj.on(json)
+    assert_equal false, json_obj.instance_variable_get(:@opts)[:max_nesting]
+  end
+
+  def test_initialize_without_max_nesting_exceeding_limit
+    json_obj = JsonPath.new('$.a.b.c', max_nesting: 90)
+    assert_equal 90, json_obj.instance_variable_get(:@opts)[:max_nesting]
+  end
+
+  def test_initialize_with_max_nesting_false_limit
+    json_obj = JsonPath.new('$.a.b.c', max_nesting: false)
+    assert_equal false, json_obj.instance_variable_get(:@opts)[:max_nesting]
   end
 
   def example_object
@@ -1244,10 +1287,12 @@ class TestJsonpath < MiniTest::Unit::TestCase
       },
       '@id' => 'http://example.org/store/42',
       '$meta-data' => 'whatevs',
+      'Übermorgen' => 'The day after tomorrow',
+      'Title Case' => 'A title case string',
       '_links' => { 'self' => {} }
     } }
   end
-  
+
   def test_fetch_all_path
     data = {
       "foo" => nil,
@@ -1261,5 +1306,18 @@ class TestJsonpath < MiniTest::Unit::TestCase
       ]
     }
     assert_equal ["$", "$.foo", "$.bar", "$.bar.baz", "$.bars", "$.bars[0].foo", "$.bars[0]", "$.bars[1].foo", "$.bars[1]", "$.bars[2]"], JsonPath.fetch_all_path(data)
+  end
+
+
+  def test_extractore_with_dollar_key
+    json = {"test" => {"$" =>"success", "a" => "123"}}
+    assert_equal ["success"],  JsonPath.on(json, "$.test.$")
+    assert_equal ["123"],  JsonPath.on(json, "$.test.a")
+  end
+
+  def test_symbolize_key
+    data = { "store" => { "book" => [{"category" => "reference"}]}}
+    assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]', symbolize_keys: true).on(data)
+    assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]').on(data, symbolize_keys: true)
   end
 end

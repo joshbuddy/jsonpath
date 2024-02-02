@@ -21,9 +21,13 @@ class JsonPath
       when '*', '..', '@'
         each(context, key, pos + 1, &blk)
       when '$'
-        each(context, key, pos + 1, &blk) if node == @object
+        if node == @object
+          each(context, key, pos + 1, &blk)
+        else
+          handle_wildcard(node, "['#{expr}']", context, key, pos, &blk)
+        end
       when /^\[(.*)\]$/
-        handle_wildecard(node, expr, context, key, pos, &blk)
+        handle_wildcard(node, expr, context, key, pos, &blk)
       when /\(.*\)/
         keys = expr.gsub(/[()]/, '').split(',').map(&:strip)
         new_context = filter_context(context, keys)
@@ -51,7 +55,7 @@ class JsonPath
       end
     end
 
-    def handle_wildecard(node, expr, _context, _key, pos, &blk)
+    def handle_wildcard(node, expr, _context, _key, pos, &blk)
       expr[1, expr.size - 2].split(',').each do |sub_path|
         case sub_path[0]
         when '\'', '"'
@@ -64,6 +68,7 @@ class JsonPath
         else
           next if node.is_a?(Array) && node.empty?
           next if node.nil? # when default_path_leaf_to_null is true
+          next if node.size.zero?
 
           array_args = sub_path.split(':')
           if array_args[0] == '*'
@@ -81,6 +86,7 @@ class JsonPath
             next unless end_idx
             next if start_idx == end_idx && start_idx >= node.size
           end
+
           start_idx %= node.size
           end_idx %= node.size
           step = process_function_or_literal(array_args[2], 1)
@@ -148,8 +154,9 @@ class JsonPath
       return Integer(exp) if exp[0] != '('
       return nil unless @_current_node
 
-      identifiers = /@?((?<!\d)\.(?!\d)(\w+))+/.match(exp)
-      if !identifiers.nil? && !@_current_node.methods.include?(identifiers[2].to_sym)
+      identifiers = /@?(((?<!\d)\.(?!\d)(\w+))|\['(.*?)'\])+/.match(exp)
+      # to filter arrays with known/unknown name.
+      if (!identifiers.nil? && !(@_current_node.methods.include?(identifiers[2]&.to_sym) || @_current_node.methods.include?(identifiers[4]&.to_sym)))
         exp_to_eval = exp.dup
         begin
           return JsonPath::Parser.new(@_current_node, @options).parse(exp_to_eval)

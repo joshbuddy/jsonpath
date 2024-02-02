@@ -5,7 +5,7 @@ require File.join(File.dirname(__FILE__), 'lib', 'jsonpath', 'version')
 Gem::Specification.new do |s|
   s.name = 'jsonpath'
   s.version = JsonPath::VERSION
-  s.required_ruby_version = '>= 2.5'
+  s.required_ruby_version = '>= 2.6'
   s.authors = ['Joshua Hull', 'Gergely Brautigam']
   s.summary = 'Ruby implementation of http://goessner.net/articles/JsonPath/'
   s.description = 'Ruby implementation of http://goessner.net/articles/JsonPath/.'

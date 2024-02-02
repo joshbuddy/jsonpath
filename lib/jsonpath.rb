@@ -12,25 +12,27 @@ require 'jsonpath/parser'
 # into a token array.
 class JsonPath
   PATH_ALL = '$..*'
+  MAX_NESTING_ALLOWED = 100
 
   DEFAULT_OPTIONS = {
     :default_path_leaf_to_null => false,
     :symbolize_keys => false,
     :use_symbols => false,
     :allow_send => true,
-    :max_nesting => 100
+    :max_nesting => MAX_NESTING_ALLOWED
   }
 
   attr_accessor :path
 
   def initialize(path, opts = {})
     @opts = DEFAULT_OPTIONS.merge(opts)
+    set_max_nesting
     scanner = StringScanner.new(path.strip)
     @path = []
     until scanner.eos?
       if (token = scanner.scan(/\$\B|@\B|\*|\.\./))
         @path << token
-      elsif (token = scanner.scan(/[$@a-zA-Z0-9:{}_-]+/))
+      elsif (token = scanner.scan(/[$@\p{Alnum}:{}_ -]+/))
         @path << "['#{token}']"
       elsif (token = scanner.scan(/'(.*?)'/))
         @path << "[#{token}]"
@@ -45,11 +47,9 @@ class JsonPath
       elsif (token = scanner.scan(/[><=] \d+/))
         @path.last << token
       elsif (token = scanner.scan(/./))
-        begin
-          @path.last << token
-        rescue RuntimeError
-          raise ArgumentError, "character '#{token}' not supported in query"
-        end
+        @path.last << token
+      else
+        raise ArgumentError, "character '#{scanner.peek(1)}' not supported in query"
       end
     end
   end
@@ -80,14 +80,14 @@ class JsonPath
 
   def on(obj_or_str, opts = {})
     a = enum_on(obj_or_str).to_a
-    if opts[:symbolize_keys]
+    if symbolize_keys?(opts)
       a.map! do |e|
         e.each_with_object({}) { |(k, v), memo| memo[k.to_sym] = v; }
       end
     end
     a
   end
-  
+
   def self.fetch_all_path(obj)
     all_paths = ['$']
     find_path(obj, '$', all_paths, obj.class == Array)
@@ -147,5 +147,14 @@ class JsonPath
 
   def deep_clone
     Marshal.load Marshal.dump(self)
+  end
+
+  def set_max_nesting
+    return unless @opts[:max_nesting].is_a?(Integer) && @opts[:max_nesting] > MAX_NESTING_ALLOWED
+    @opts[:max_nesting] = false
+  end
+
+  def symbolize_keys?(opts)
+    opts.fetch(:symbolize_keys, @opts&.dig(:symbolize_keys))
   end
 end
