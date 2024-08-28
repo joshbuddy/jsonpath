@@ -5,7 +5,7 @@ require 'phocus'
 require 'jsonpath'
 require 'json'
 
-class TestJsonpath < MiniTest::Unit::TestCase
+class TestJsonpath < Minitest::Unit::TestCase
   def setup
     @object = example_object
     @object2 = example_object

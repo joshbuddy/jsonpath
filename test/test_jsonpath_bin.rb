@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'phocus'
 require 'jsonpath'
 
-class TestJsonpathBin < MiniTest::Unit::TestCase
+class TestJsonpathBin < Minitest::Unit::TestCase
   def setup
     @runner = 'ruby -Ilib bin/jsonpath'
     @original_dir = Dir.pwd

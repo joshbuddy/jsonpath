@@ -5,7 +5,7 @@ require 'phocus'
 require 'jsonpath'
 require 'json'
 
-class TestJsonpathReadme < MiniTest::Unit::TestCase
+class TestJsonpathReadme < Minitest::Unit::TestCase
 
   def setup
     @json = <<-HERE_DOC
