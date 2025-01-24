@@ -144,7 +144,7 @@ class JsonPath
         if key
           context[key] = blk.call(context[key])
         else
-          context.replace(blk.call(context[key]))
+          context.replace(blk.call(context))
         end
       end
     end
