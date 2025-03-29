@@ -1044,6 +1044,22 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_equal [{ 'category' => 'reference', 'author' => 'Nigel Rees' }, { 'category' => 'fiction', 'author' => 'Evelyn Waugh' }], JsonPath.on(json, '$.store.book[*](category,author)')
   end
 
+  def test_selecting_key_with_a_dot_in_it
+    json = '
+    {
+      "foo.bar": {
+        "baz": 3
+      },
+      "baz.bar": {
+        "foo.bar": "baz"
+      }
+    }
+    '.to_json
+
+    assert_equal [{ 'baz' => 3 }], JsonPath.on(json, '$.\'foo.bar\'')
+    assert_equal ["baz"], JsonPath.on(json, '$.\'baz.bar\'.\'foo.bar\'')
+  end
+
   def test_selecting_multiple_keys_on_array_with_filter
     json = '
     {
@@ -1295,15 +1311,17 @@ class TestJsonpath < MiniTest::Unit::TestCase
     data = {
       "foo" => nil,
       "bar" => {
-        "baz" => nil
+        "baz" => nil,
+        "baz.foo" => 3
       },
       "bars" => [
         { "foo" => 12 },
         { "foo" => nil },
+        { "foo.baz" => 3 },
         { }
       ]
     }
-    assert_equal ["$", "$.foo", "$.bar", "$.bar.baz", "$.bars", "$.bars[0].foo", "$.bars[0]", "$.bars[1].foo", "$.bars[1]", "$.bars[2]"], JsonPath.fetch_all_path(data)
+    assert_equal ["$", "$.foo", "$.bar", "$.bar.baz", "$.bar.'baz.foo'", "$.bars", "$.bars[0].foo", "$.bars[0]", "$.bars[1].foo", "$.bars[1]", "$.bars[2].'foo.baz'", "$.bars[2]", "$.bars[3]"], JsonPath.fetch_all_path(data)
   end
 
 
