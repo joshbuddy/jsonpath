@@ -20,7 +20,7 @@ class JsonPath
     :use_symbols => false,
     :allow_send => true,
     :max_nesting => MAX_NESTING_ALLOWED
-  }
+  }.freeze
 
   attr_accessor :path
 
