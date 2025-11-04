@@ -16,6 +16,7 @@ class JsonPath
 
   DEFAULT_OPTIONS = {
     :default_path_leaf_to_null => false,
+    :default_missing_path_to_null => false,
     :symbolize_keys => false,
     :use_symbols => false,
     :allow_send => true,
@@ -52,6 +53,10 @@ class JsonPath
         raise ArgumentError, "character '#{scanner.peek(1)}' not supported in query"
       end
     end
+
+    # Disable default_missing_path_to_null option for recursive descent paths
+    # To avoid duplicating nils during recursive descent for every checked path
+    @opts[:default_missing_path_to_null] = false if @path.include?('..')
   end
 
   def find_matching_brackets(token, scanner)

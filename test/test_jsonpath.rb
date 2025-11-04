@@ -895,7 +895,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     path = "$..book[?((@['author'] == 'Evelyn Waugh' || @['author'] == 'Herman Melville') && (@['price'] == 33 || @['price'] == 9))]"
     assert_equal [@object['store']['book'][2]], JsonPath.new(path).on(@object)
   end
-  
+
   def test_nested_with_unknown_key
     path = "$..[?(@.price == 9 || @.price == 33)].title"
     assert_equal ["Sayings of the Century", "Moby Dick", "Sayings of the Century", "Moby Dick"], JsonPath.new(path).on(@object)
@@ -905,7 +905,7 @@ class TestJsonpath < MiniTest::Unit::TestCase
     path = "$..[?(@['price'] == 9 || @['price'] == 33)].title"
     assert_equal ["Sayings of the Century", "Moby Dick", "Sayings of the Century", "Moby Dick"], JsonPath.new(path).on(@object)
   end
-  
+
   def test_runtime_error_frozen_string
     skip('in ruby version below 2.2.0 this error is not raised') if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.0') || Gem::Version.new(RUBY_VERSION) > Gem::Version::new('2.6')
     json = '
@@ -1317,5 +1317,138 @@ class TestJsonpath < MiniTest::Unit::TestCase
     data = { "store" => { "book" => [{"category" => "reference"}]}}
     assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]', symbolize_keys: true).on(data)
     assert_equal [{"category": "reference"}],  JsonPath.new('$..book[0]').on(data, symbolize_keys: true)
+  end
+
+  def test_recursive_descent_with_default_options
+    data = { 'store' => {
+      'book' => [
+        { 'category' => 'reference',
+          'author' => 'Nigel Rees',
+          'title' => 'Sayings of the Century',
+          'price' => 9,
+          'review' => nil },
+        { 'category' => 'fiction',
+          'author' => 'Evelyn Waugh',
+          'title' => 'Sword of Honour',
+          'price' => 13,
+          'review' => { 'rating' => 5, 'comment' => 'Excellent!' } },
+        { 'category' => 'fiction',
+          'author' => 'Herman Melville',
+          'title' => 'Moby Dick',
+          'price' => 9 }
+      ]
+    }}
+
+    leaf_path_result = JsonPath.new('$..book[*].review.rating', default_path_leaf_to_null: true).on(data)
+    assert_equal [5], leaf_path_result
+
+    missing_path_result = JsonPath.new('$..book[*].review.rating', default_missing_path_to_null: true).on(data)
+    assert_equal [5], missing_path_result
+
+    normal_result = JsonPath.new('$..book[*].review.rating').on(data)
+    assert_equal [5], normal_result
+  end
+
+  def test_default_missing_path_to_null_multiple_nesting_levels
+    data = { 'store' => {
+      'book' => [
+        { 'title' => 'Book One',
+          'metadata' => nil }, # Null at first level
+        { 'title' => 'Book Two',
+          'metadata' => { 'publication' => nil } }, # Null at second level
+        { 'title' => 'Book Three',
+          'metadata' => {
+            'publication' => {
+              'details' => nil
+            }
+          } }, # Null at third level
+        { 'title' => 'Book Four',
+          'metadata' => {
+            'publication' => {
+              'details' => {
+                'isbn' => '978-0123456789'
+              }
+            }
+          } }
+      ]
+    }}
+
+    result_without = JsonPath.new('$.store.book[*].metadata.publication.details.isbn').on(data)
+    assert_equal ['978-0123456789'], result_without
+
+    result_with = JsonPath.new('$.store.book[*].metadata.publication.details.isbn', default_missing_path_to_null: true).on(data)
+    assert_equal [nil, nil, nil, '978-0123456789'], result_with
+  end
+
+  def test_default_missing_path_to_null_finds_missing_keys
+    data = { 'store' => {
+      'book' => [
+        { 'title' => 'The Hobbit',
+          'category' => 'fantasy'
+        },
+        { 'title' => 'The Great Gatsby',
+          'category' => 'classic',
+          'metadata' => { 'isbn' => '978-0743273565' }
+        }
+      ]
+    }}
+
+    result_without = JsonPath.new('$.store.book[*].metadata.isbn').on(data)
+    assert_equal ['978-0743273565'], result_without
+
+    result_with = JsonPath.new('$.store.book[*].metadata.isbn', default_missing_path_to_null: true).on(data)
+    assert_equal [nil, '978-0743273565'], result_with
+  end
+
+  def test_default_missing_path_to_null_with_array_index_access
+    data = [
+      { 'title' => 'Sayings of the Century',
+        'reviews' => [{ 'rating' => 5 }] },
+      { 'title' => 'Sword of Honour',
+        'reviews' => [{ 'rating' => 4 }, { 'rating' => 3 }] },
+      { 'title' => 'Moby Dick',
+        'reviews' => [{ 'rating' => 5 }] }
+    ]
+
+    result_without = JsonPath.new('$[*].reviews[1].rating').on(data)
+    assert_equal [3], result_without
+
+    result_with = JsonPath.new('$[*].reviews[1].rating', default_missing_path_to_null: true).on(data)
+    assert_equal [nil, 3, nil], result_with
+  end
+
+  def test_default_missing_path_to_null_avoids_key_collision
+    data = [
+      { 'title' => 'Book One', 'author' => nil },
+      { 'title' => 'Book Two', 'author' => nil },
+      { 'title' => 'Book Three', 'author' => { 'name' => 'Jane Doe', 'title' => 'Dr.' } }
+    ]
+    result_without = JsonPath.new('$[*].author.name', default_missing_path_to_null: true).on(data)
+    assert_equal [nil, nil, 'Jane Doe'], result_without
+
+    result_title = JsonPath.new('$[*].author.title', default_missing_path_to_null: true).on(data)
+    assert_equal [nil, nil, 'Dr.'], result_title
+  end
+
+  def test_default_missing_path_to_null_with_recursive_descent
+    data = {
+      'library' => {
+        'name' => 'Central Library',
+        'books' => [
+          { 'title' => 'Book One', 'author' => nil },
+          { 'title' => 'Book Two', 'author' => { 'name' => 'Jane Smith' } },
+          { 'title' => 'Book Three' }
+        ],
+        'magazines' => [
+          { 'title' => 'Mag One', 'author' => { 'name' => 'Bob Jones' } }
+        ]
+      }
+    }
+
+    result_without = JsonPath.new('$..author.name').on(data)
+    assert_equal ['Jane Smith', 'Bob Jones'], result_without
+
+    result_with = JsonPath.new('$..author.name', default_missing_path_to_null: true).on(data)
+    assert_equal ['Jane Smith', 'Bob Jones'], result_with
   end
 end

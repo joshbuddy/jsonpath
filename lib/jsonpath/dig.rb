@@ -42,11 +42,11 @@ class JsonPath
         nil
       when Hash
         k = @options[:use_symbols] ? k.to_sym : k
-        return yield if context.key?(k) || @options[:default_path_leaf_to_null]
+        return yield if context.key?(k) || @options[:default_path_leaf_to_null] || @options[:default_missing_path_to_null]
       else
         if context.respond_to?(:dig)
           digged = dig_one(context, k)
-          yield if !digged.nil? || @options[:default_path_leaf_to_null]
+          yield if !digged.nil? || @options[:default_path_leaf_to_null] || @options[:default_missing_path_to_null]
         elsif @options[:allow_send] && context.respond_to?(k.to_s) && !Object.respond_to?(k.to_s)
           yield
         end

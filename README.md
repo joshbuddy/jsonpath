@@ -100,7 +100,7 @@ JsonPath.new('$..color').first(json)
 # => "red"
 ```
 
-As well, we can directly create an `Enumerable` at any time using `#[]`. 
+As well, we can directly create an `Enumerable` at any time using `#[]`.
 
 ```ruby
 enum = JsonPath.new('$..color')[json]
@@ -157,7 +157,7 @@ JsonPath.new('$.title', allow_send: true).on(book)
 ### Other available options
 
 By default, JsonPath does not return null values on unexisting paths.
-This can be changed using the `:default_path_leaf_to_null` option
+This can be changed using the `:default_path_leaf_to_null` option to return nil for leaf nodes:
 
 ```ruby
 JsonPath.new('$..book[*].isbn').on(json)
@@ -165,6 +165,28 @@ JsonPath.new('$..book[*].isbn').on(json)
 
 JsonPath.new('$..book[*].isbn', default_path_leaf_to_null: true).on(json)
 # => [nil, nil, "0-553-21311-3", "0-395-19395-8"]
+```
+
+Or it can be changed using the `:default_missing_path_to_null` option which will include both
+leaf nodes and missing intermediate paths.
+
+```ruby
+data = [
+  { "review" => nil },
+  { "review" => { "rating" => 5 } },
+  { "review" => { "rating" => nil } },
+  { "review" => { "comment" => "good" } },
+  { "review" => { "rating" => 3 } }
+]
+
+JsonPath.new('$[*].review.rating').on(data)
+# => [5, nil, 3]
+
+JsonPath.new('$[*].review.rating', default_path_leaf_to_null: true).on(data)
+# => [5, nil, nil, 3]
+
+JsonPath.new('$[*].review.rating', default_missing_path_to_null: true).on(data)
+# => [nil, 5, nil, nil, 3]
 ```
 
 When JsonPath returns a Hash, you can ask to symbolize its keys
