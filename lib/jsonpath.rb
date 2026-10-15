@@ -142,7 +142,13 @@ class JsonPath
   private
 
   def self.process_object(obj_or_str, opts = {})
-    obj_or_str.is_a?(String) ? MultiJson.decode(obj_or_str, max_nesting: opts[:max_nesting]) : obj_or_str
+    return obj_or_str unless obj_or_str.is_a?(String)
+
+    if defined?(MultiJSON)
+      MultiJSON.parse(obj_or_str, max_nesting: opts[:max_nesting])
+    else
+      MultiJson.load(obj_or_str, max_nesting: opts[:max_nesting])
+    end
   end
 
   def deep_clone

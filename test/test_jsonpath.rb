@@ -4,6 +4,8 @@ require 'minitest/autorun'
 require 'phocus'
 require 'jsonpath'
 require 'json'
+require 'open3'
+require 'rbconfig'
 
 class TestJsonpath < MiniTest::Unit::TestCase
   def setup
@@ -15,6 +17,23 @@ class TestJsonpath < MiniTest::Unit::TestCase
     assert_raises(ArgumentError) { JsonPath.new('$.store.book[0') }
     assert_raises(ArgumentError) { JsonPath.new('$.store.book[0]]') }
     assert_equal [9], JsonPath.new('$.store.book[0].price').on(@object)
+  end
+
+  def test_parse_string_without_deprecation_warnings
+    # Use a fresh process because newer multi_json releases warn only once per API.
+    code = <<~RUBY
+      gem 'multi_json', '#{Gem.loaded_specs['multi_json'].version}'
+      require 'jsonpath'
+      puts JsonPath.new('$.credential.access_token').first(
+        '{"credential":{"access_token":"example-token"}}'
+      )
+    RUBY
+    stdout, stderr, status = Open3.capture3(
+      RbConfig.ruby, '-W2', '-I', File.expand_path('../lib', __dir__), '-e', code
+    )
+    assert status.success?, stderr
+    assert_equal "example-token\n", stdout
+    assert_equal '', stderr
   end
 
   def test_lookup_direct_path
@@ -1189,7 +1208,8 @@ class TestJsonpath < MiniTest::Unit::TestCase
       }
     }.to_json
 
-    assert_raises(MultiJson::ParseError) { JsonPath.new('$.a', max_nesting: 1).on(json) }
+    json_parser = defined?(MultiJSON) ? MultiJSON : MultiJson
+    assert_raises(json_parser::ParseError) { JsonPath.new('$.a', max_nesting: 1).on(json) }
   end
 
   def test_linefeed_in_path_error
