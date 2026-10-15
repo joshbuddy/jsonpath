@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.licenses    = ['MIT']
 
   # dependencies
-  s.add_runtime_dependency 'multi_json'
+  s.add_runtime_dependency 'multi_json', '>= 1.3'
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'code_stats'
   s.add_development_dependency 'minitest', '~> 2.2.0'
